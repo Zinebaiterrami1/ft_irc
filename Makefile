@@ -4,7 +4,7 @@ CXX = g++
 
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 
-SRC = main.cpp
+SRC = parser_test.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

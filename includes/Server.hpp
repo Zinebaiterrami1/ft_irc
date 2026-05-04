@@ -7,11 +7,11 @@
 # include <sys/types.h>
 # include <sys/socket.h>
 # include "../config.hpp"
+# include <cstring>
 
 struct Connection
 {
     int fd;
-    config info;
     Connection();
     Connection(int fd);
 };
@@ -22,8 +22,9 @@ class Server
         int _server_fd;
         int _poll_fd;
         struct sockaddr_in _address;
+        config info;
     public:
-        void initSocket();
+        bool initSocket();
         void runSocket();
         void removeClient(int fd);
 };

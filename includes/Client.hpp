@@ -11,15 +11,22 @@ class Client{
         int hostname;// ip accept() clientAddr.sin_addr
 
     public :
-        Client();
+        Client(int fd, char *hostname);
         ~Client();
         int getFd();
+        
+        std::string commande;
+        
+        // void setNickname(std::string nickname);
+        // void setUsername(std::string username);
+        // void setCommande(std::string commande);
+        // void setIsRegistred(bool isRegistred);
+        // void setHostname(int hostname);
+        
 };
 
 
-Client::Client(){
-    
-}
+Client::Client(int fd, char* hostname) : fd(fd), hostname(hostname), isRegistred(false){}
 Client::~Client(){}
 
 int Client::getFd(){

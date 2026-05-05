@@ -36,10 +36,6 @@ bool Server::initSocket()
         std::cerr << "getaddressinfo " <<  gai_strerror(status) << std::endl;
         return false;
     }
-    // servinfo now points to a linked list of 1 or more
-    // struct addrinfos
-    // ... do everything until you don't need servinfo anymore ....
-    // loop through all the results and bind to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next)
     {
         if((_srvSoc_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
@@ -125,7 +121,35 @@ void Server::addNewClient()
     std::cout << "New client connected: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-void Server::receiveData()
+void Server::receiveData(&Client client)
 {
-    
+    char buffer[513];
+    buffer[0] = '\0';
+    recv(client.getFd(), buffer, sizeof(buffer), 0);
+    // client.setCommande(buffer);
+    if(strlen(buffer) > 0){
+        client.commande.append(buffer);
+    }
+    else
+        if(!client.commande.empty() && client.count("\r\n"))
+            //parse
+            //execute //send inside methode
+        else 
+            //close connection and error
+}
+
+void Server::receiveData(&Client client)
+{
+    char buffer[513];
+    buffer = '\0';
+    int bytes = recv(client.getFd(), buffer, sizeof(buffer), 0);
+    if(bytes > 0){
+        
+    }
+    else if(bytes == 0){//connection close
+
+    }
+    else{//an error occured perror()
+
+    }
 }

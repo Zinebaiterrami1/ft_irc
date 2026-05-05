@@ -122,10 +122,67 @@ void Server::addNewClient()
     Client *client = new Client(clientFd, inet_ntoa(clientAddr.sin_addr));
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
+    fds.push_back(clientPollFd);
     std::cout << "New client connected: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-void Server::receiveData()
+void Server::receiveData(int fd)
 {
-    
+    //  call of recv
+    char buffer[1024];
+    memset(buffer, 0, sizeof(buffer));
+    ssize_t byte_received = recv(fd, buffer, sizeof(buffer) - 1, 0);
+}
+
+void Server::sendData(int fd, std::string mssg)
+{
+    int bytes = send(fd, mssg.c_str(), mssg.length(), 0);
+    if(bytes == -1)
+    {
+        perror("send");
+        removeClient(fd, 0);
+    }
+    else
+        std::cout << "Sent to " << fd << ": " << mssg << std::endl;
+}
+
+void Server::removeClient(int fd, int flag)
+{
+    //remove from poll vector, vector clientfds, client
+    if(flag)
+    {
+        std::vector<Client*>::iterator it = this->clients.begin();
+        while(it != clients.end())
+        {
+            delete *it;
+            it++;
+        }
+        this->clients.clear();
+        return ;
+    }
+    // Remove from pollfd vector
+    for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
+    {
+        if(it->fd == fd)
+        {
+            fds.erase(it);
+            break;
+        }
+    }
+    //remove from client fds vectore
+    for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
+    {
+        if(*it == fd)
+        {
+            ClientFds.erase(it);
+            break;
+        }
+    }
+    std::cout << "Client " << fd << " removed" << std::endl;
+    close(fd);
+}
+
+void Server::CloseConnection()
+{
+
 }

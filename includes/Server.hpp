@@ -10,10 +10,11 @@
 # include <cstring>
 # include <vector>
 # include "../includes/Client.hpp"
-# include "../includes/Channel.hpp"
+# include "../commands/Channel.hpp"
 # include <poll.h>
 # include <unistd.h>
 # include <fcntl.h>
+# include <arpa/inet.h>
 
 class Server
 {
@@ -32,8 +33,8 @@ class Server
         bool initSocket();
         void addNewClient();
         void receiveData(int fd);
-        void sendMssg(int fd, std::string msg);
+        void sendData(int fd, std::string msg);
         void CloseConnection();
         void runSocket();
-        void removeClient(int fd);
+        void removeClient(int fd, int flag);
 };

@@ -1,17 +1,27 @@
 # include "../includes/Server.hpp"
 
+bool Server::sig = false;
 
-
-void initSocket()
+Server::Server(const config &cfg) : _srvSoc_fd(-1) , _config(cfg)
 {
-    /*
-    socket
-    bind
-    listen
-    accept
-    recv
-    send
-    */
+
+}
+
+Server::~Server()
+{
+    if(_srvSoc_fd != -1)
+        close(_srvSoc_fd);
+}
+
+void signalHandler(int signum)
+{
+    (void)signum;
+    std::cout << "\nSignal received, shutting down..." << std::endl;
+    Server::sig = true;
+}
+
+bool Server::initSocket()
+{
     int status;
     struct addrinfo hints;
     struct addrinfo *servinfo; //point to results
@@ -21,7 +31,7 @@ void initSocket()
     hints.ai_family = AF_UNSPEC; //don't care IPv4 or IPv6
     hints.ai_socktype = SOCK_STREAM; //TCP stream sockets
     hints.ai_flags = AI_PASSIVE; //fill in my IP for me
-    if((status = getaddrinfo(NULL, info.port, &hints, &servinfo)) != 0)
+    if((status = getaddrinfo(NULL, std::to_string(_config.port).c_str(), &hints, &servinfo)) != 0)
     {
         std::cerr << "getaddressinfo " <<  gai_strerror(status) << std::endl;
         return false;
@@ -32,26 +42,33 @@ void initSocket()
     // loop through all the results and bind to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next)
     {
-        if((_server_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
+        if((_srvSoc_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
         {
             perror("socket");
             continue;
         }
         //Set non-blocking
-        int flags = fcntl(_server_fd, F_GETFL, 0);
+        int flags = fcntl(_srvSoc_fd, F_GETFL, 0);
         if(flags == -1)
         {
             perror("fcntl F_GETFL");
             return false;
         }
         // Set the O_NONBLOCK flag
-        if (fcntl(_server_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-            perror("fcntl F_SETFL O_NONBLOCK");
+        if (fcntl(_srvSoc_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+            perror("fcntl");
             return false;
         }
-        if(bind(_server_fd, p->ai_addr, p->ai_addrlen) == -1)
+        int opt = 1;
+        if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)\
         {
-            close(_server_fd);
+            perror("setsockopt");
+            close(_srvSoc_fd);
+            return false;
+        }
+        if(bind(_srvSoc_fd, p->ai_addr, p->ai_addrlen) == -1)
+        {
+            close(_srvSoc_fd);
             perror("bind");
             continue;
         }
@@ -59,39 +76,56 @@ void initSocket()
     }
     freeaddrinfo(servinfo); // free the linked-list
 
-    if (current == NULL)
+    if (p == NULL)
     {
         std::cerr << "bind: unable to create server socket" << std::endl;
         return false;
     }
 
-    if(listen(_server_fd, SOMAXCONN) < 0)
+    if(listen(_srvSoc_fd, SOMAXCONN) < 0)
     {
         perror("listen");
-        close(_server_fd);
+        close(_srvSoc_fd);
         return false;
     }
     std::cout << "Server listening on port " << _config.port << std::endl;
+    
+    struct pollfd ev;
+
+    ev.fd = _srvSoc_fd;
+    ev.events = POLLIN;
+    ev.revents = 0;
+
+    fds.push_back(ev);
     return true;
 }
 
-//getaddrinfo → socket → setsockopt → bind → listen → fcntl → poll
+void Server::addNewClient()
+{
+    //accept
+    sockaddr_in clientAddr;
+    socklen_t addrLen = sizeof(clientAddr);
+    if(sig)
+        return ;
+    int clientFd = accept(_srvSoc_fd, (struct sockaddr *)&clientAddr, &addrLen);
+    if(clientFd == -1)
+    {
+        perror("accept");
+        return ;
+    }
+    //create new client
+    pollfd clientPollFd;
 
-🧭 10. Your next move (clear plan)
+    clientPollFd.fd = clientFd;
+    clientPollFd.events = POLLIN;
+    clientPollFd.revents = 0;
+    Client *client = new Client(clientFd, inet_ntoa(clientAddr.sin_addr));
+    clients.push_back(client);
+    ClientFds.push_back(client->getFd());
+    std::cout << "New client connected: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
+}
 
-Do this EXACTLY:
-
-Phase 1 (today)
-Server socket
-bind/listen
-poll setup
-Phase 2
-accept clients
-store them
-Phase 3
-recv from clients
-print what they send (debug)
-Phase 4
-implement buffer per client
-Phase 5
-parse commands
+void Server::receiveData()
+{
+    
+}

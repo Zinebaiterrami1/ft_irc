@@ -37,6 +37,18 @@ void initSocket()
             perror("socket");
             continue;
         }
+        //Set non-blocking
+        int flags = fcntl(_server_fd, F_GETFL, 0);
+        if(flags == -1)
+        {
+            perror("fcntl F_GETFL");
+            return false;
+        }
+        // Set the O_NONBLOCK flag
+        if (fcntl(_server_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+            perror("fcntl F_SETFL O_NONBLOCK");
+            return false;
+        }
         if(bind(_server_fd, p->ai_addr, p->ai_addrlen) == -1)
         {
             close(_server_fd);

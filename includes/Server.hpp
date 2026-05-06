@@ -31,7 +31,7 @@ class Server
         ~Server();
         bool initSocket();
         void addNewClient();
-        void receiveData(int fd);
+        void receiveData(Client &client);
         void sendMssg(int fd, std::string msg);
         void CloseConnection();
         void runSocket();

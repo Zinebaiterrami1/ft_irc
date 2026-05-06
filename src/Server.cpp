@@ -121,35 +121,45 @@ void Server::addNewClient()
     std::cout << "New client connected: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-void Server::receiveData(&Client client)
-{
-    char buffer[513];
-    buffer[0] = '\0';
-    recv(client.getFd(), buffer, sizeof(buffer), 0);
-    // client.setCommande(buffer);
-    if(strlen(buffer) > 0){
-        client.commande.append(buffer);
-    }
-    else
-        if(!client.commande.empty() && client.count("\r\n"))
-            //parse
-            //execute //send inside methode
-        else 
-            //close connection and error
-}
+// void Server::receiveData(&Client client)
+// {
+//     char buffer[513];
+//     buffer[0] = '\0';
+//     recv(client.getFd(), buffer, sizeof(buffer), 0);
+//     // client.setCommande(buffer);
+//     if(strlen(buffer) > 0){
+//         client.commande.append(buffer);
+//     }
+//     else
+//         if(!client.commande.empty() && client.count("\r\n"))
+//             //parse
+//             //execute //send inside methode
+//         else 
+//             //close connection and error
+// }
 
-void Server::receiveData(&Client client)
+void Server::receiveData(int clientFd)
 {
-    char buffer[513];
-    buffer = '\0';
-    int bytes = recv(client.getFd(), buffer, sizeof(buffer), 0);
-    if(bytes > 0){
+    std::string buffer;
+    char tmp[513];
+    tmp[0] = '\0';
+    // buffer = '\0';
+    int bytes = recv(clientFd, tmp, sizeof(buffer), 0);
+    if(bytes > 0){//append buffer 
+        buffer += tmp;
+        size_t found = buffer.find('\n');
+        if(found != std::string::npos){
+            //donne a parse commande et execute
+            int x = buffer[found-1] != '\r'?0:1;
+            std::string cmd = buffer.substr(0, found-x);
+            buffer = buffer.substr(found-x, buffer.length());
+            execute(parser_commande(cmd));
+        }
+    }
+    else if(bytes == 0){//connection close //remove client
         
     }
-    else if(bytes == 0){//connection close
-
-    }
     else{//an error occured perror()
-
+        perror("recv : ");
     }
 }

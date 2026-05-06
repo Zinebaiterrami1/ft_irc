@@ -125,13 +125,10 @@ void Server::addNewClient()
     std::cout << "New client connected: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-void Server::receiveData(int fd)
-{
-    //  call of recv
-    char buffer[1024];
-    memset(buffer, 0, sizeof(buffer));
-    ssize_t byte_received = recv(fd, buffer, sizeof(buffer) - 1, 0);
-}
+// void Server::receiveData(int fd)
+// {
+
+// }
 
 void Server::sendData(int fd, std::string mssg)
 {

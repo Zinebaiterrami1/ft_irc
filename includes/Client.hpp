@@ -3,19 +3,19 @@
 #include <string>
 
 class Client{
-    private :
+    public :
         int fd; //socket du client
         std::string nickname;// if nick
         std::string username;// if user
+        char *hostname;// ip accept() clientAddr.sin_addr
         bool isRegistred;
-        int hostname;// ip accept() clientAddr.sin_addr
 
     public :
         Client(int fd, char *hostname);
         ~Client();
         int getFd();
         
-        std::string commande;
+        std::string buffer;//WACH hada dyal response ola req
         
         // void setNickname(std::string nickname);
         // void setUsername(std::string username);
@@ -26,9 +26,3 @@ class Client{
 };
 
 
-Client::Client(int fd, char* hostname) : fd(fd), hostname(hostname), isRegistred(false){}
-Client::~Client(){}
-
-int Client::getFd(){
-    return fd;
-}

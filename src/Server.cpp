@@ -1,5 +1,6 @@
 # include "../includes/Server.hpp"
 
+
 bool Server::sig = false;
 
 Server::Server(const config &cfg) : _srvSoc_fd(-1) , _config(cfg)
@@ -11,6 +12,15 @@ Server::~Server()
 {
     if(_srvSoc_fd != -1)
         close(_srvSoc_fd);
+}
+
+Client *Server::getClient(int fd){
+        std::vector<Client *>::iterator it = clients.begin();
+        for(;it != clients.end(); it++){
+                if((*(*it)).fd == fd)
+                        return *it;
+        }
+        return NULL;
 }
 
 void signalHandler(int signum)
@@ -84,7 +94,6 @@ bool Server::initSocket()
         close(_srvSoc_fd);
         return false;
     }
-    std::cout << "Server listening on port " << _config.port << std::endl;
     
     struct pollfd ev;
 
@@ -118,33 +127,19 @@ void Server::addNewClient()
     Client *client = new Client(clientFd, inet_ntoa(clientAddr.sin_addr));
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
+    fds.push_back(clientPollFd);
     std::cout << "New client connected: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-// void Server::receiveData(&Client client)
-// {
-//     char buffer[513];
-//     buffer[0] = '\0';
-//     recv(client.getFd(), buffer, sizeof(buffer), 0);
-//     // client.setCommande(buffer);
-//     if(strlen(buffer) > 0){
-//         client.commande.append(buffer);
-//     }
-//     else
-//         if(!client.commande.empty() && client.count("\r\n"))
-//             //parse
-//             //execute //send inside methode
-//         else 
-//             //close connection and error
-// }
-
 void Server::receiveData(int clientFd)
 {
-    std::string buffer;
-    char tmp[513];
+    char tmp[1024];
     tmp[0] = '\0';
-    // buffer = '\0';
-    int bytes = recv(clientFd, tmp, sizeof(buffer), 0);
+    Client &client = *getClient(clientFd);
+    std::string &buffer = client.buffer;
+    
+    int bytes = recv(clientFd, tmp, sizeof(tmp)-1, 0);
+    tmp[bytes] = '\0';
     if(bytes > 0){//append buffer 
         buffer += tmp;
         size_t found = buffer.find('\n');
@@ -152,14 +147,135 @@ void Server::receiveData(int clientFd)
             //donne a parse commande et execute
             int x = buffer[found-1] != '\r'?0:1;
             std::string cmd = buffer.substr(0, found-x);
-            buffer = buffer.substr(found-x, buffer.length());
+            buffer = buffer.substr(found+1, buffer.length());
             execute(parser_commande(cmd));
         }
     }
     else if(bytes == 0){//connection close //remove client
-        
+        //leave all channels
+        //remove frome clients in server 
+        removeClient(clientFd, 0);
     }
     else{//an error occured perror()
         perror("recv : ");
     }
+}
+
+void Server::sendData(int fd, std::string mssg)
+{
+    int bytes = send(fd, mssg.c_str(), mssg.length(), 0);
+    if(bytes == -1)
+    {
+        perror("send");
+        removeClient(fd, 0);
+    }
+    else
+        std::cout << "Sent to " << fd << ": " << mssg << std::endl;
+}
+
+void Server::removeClient(int fd, int flag)
+{
+    //remove from poll vector, vector clientfds, client
+    if(flag)
+    {
+        std::vector<Client*>::iterator it = this->clients.begin();
+        while(it != clients.end())
+        {
+            delete *it;
+            it++;
+        }
+        this->clients.clear();
+        return ;
+    }
+    // Remove from pollfd vector
+    for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
+    {
+        if(it->fd == fd)
+        {
+            fds.erase(it);
+            break;
+        }
+    }
+    //remove from client fds vector
+    for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
+    {
+        if(*it == fd)
+        {
+            ClientFds.erase(it);
+            break;
+        }
+    }
+    std::cout << "Client " << fd << " removed" << std::endl;
+    close(fd);
+}
+
+void Server::CloseConnection()
+{
+    std::cout << "Closing all connections..." << std::endl;
+    //close sockets of every client here
+    for(std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+    {
+        close((*it)->getFd());
+        delete *it;
+    }
+    
+    //close socket of server
+    if(this->_srvSoc_fd != -1)
+    {
+        close(_srvSoc_fd);
+    }
+    std::cout << "All connections closed. Server shutdown complete." << std::endl;
+}
+
+void Server::ClearChannels()
+{
+    std::vector<Channel*>::iterator it;
+
+    for(it = channels.begin(); it != channels.end(); it++)
+    {
+        if(*it)
+            delete *it;
+    }
+    channels.clear();
+}
+
+void Server::runSocket()
+{
+    signal(SIGINT, signalHandler);
+    signal(SIGQUIT, signalHandler);
+    initSocket();
+    std::cout << "Server Launched and listening on port " << _config.port << std::endl;
+}
+
+void Server::StartServer()
+{
+    //call run socket. create event loop, if client new create it, if not receive his data, if signal received, shut down server
+    runSocket();
+    while(!sig)
+    {
+        if(poll(fds.data(), fds.size(), -1) == -1 && !sig)
+        {
+            perror("poll");
+            break;
+        }
+        for(size_t i = 0; i < fds.size(); i++)
+        {
+            if(fds[i].revents & POLLIN)
+            {
+                if(fds[i].fd == _srvSoc_fd)
+                {
+                    //add new client
+                    addNewClient();
+                }
+                else
+                {
+                    //receive data from existing client
+                    receiveData(fds[i].fd);
+                }
+            }
+        }
+    }
+    removeClient(_srvSoc_fd, 1);
+    CloseConnection();
+    ClearChannels();
 }

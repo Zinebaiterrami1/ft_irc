@@ -1,6 +1,7 @@
 #include<iostream>
 #include <cstdlib>
-#include"config.hpp"
+#include "includes/config.hpp"
+#include "includes/Server.hpp"
 
 bool is_valid_port(const std::string &str, int &port )
 {
@@ -46,7 +47,10 @@ int main(int ac, char **av)
         std::cerr << "password empty" << std::endl;
         return 1;
     }
-
+    
     std::cout << "Port: " << con.port << std::endl;
     std::cout << "Password: " << con.password << std::endl;
+
+    Server ser(con);
+    ser.StartServer();
 }

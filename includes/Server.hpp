@@ -6,15 +6,19 @@
 # include <netdb.h>
 # include <sys/types.h>
 # include <sys/socket.h>
-# include "../config.hpp"
+# include "config.hpp"
 # include <cstring>
 # include <vector>
 # include "../includes/Client.hpp"
 # include "../includes/Channel.hpp"
+# include "../includes/CommandHandler.hpp"
+# include "../includes/Commandeparse.hpp"
 # include <poll.h>
 # include <unistd.h>
 # include <fcntl.h>
-
+# include <arpa/inet.h>
+# include <csignal>
+#include <cstdio>
 class Server
 {
     private:
@@ -31,9 +35,14 @@ class Server
         ~Server();
         bool initSocket();
         void addNewClient();
-        void receiveData(Client &client);
-        void sendMssg(int fd, std::string msg);
+        Client *getClient(int fd);
+        void receiveData(int fd);
+        void sendData(int fd, std::string msg);
         void CloseConnection();
         void runSocket();
-        void removeClient(int fd);
+        void removeClient(int fd, int flag);
+        void ClearChannels();
+        void StartServer();
 };
+
+

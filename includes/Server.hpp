@@ -15,6 +15,7 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <arpa/inet.h>
+# include <csignal>
 
 class Server
 {
@@ -37,4 +38,6 @@ class Server
         void CloseConnection();
         void runSocket();
         void removeClient(int fd, int flag);
+        void ClearChannels();
+        void StartServer();
 };

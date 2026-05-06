@@ -88,7 +88,6 @@ bool Server::initSocket()
         close(_srvSoc_fd);
         return false;
     }
-    std::cout << "Server listening on port " << _config.port << std::endl;
     
     struct pollfd ev;
 
@@ -169,7 +168,7 @@ void Server::removeClient(int fd, int flag)
             break;
         }
     }
-    //remove from client fds vectore
+    //remove from client fds vector
     for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
     {
         if(*it == fd)
@@ -184,5 +183,71 @@ void Server::removeClient(int fd, int flag)
 
 void Server::CloseConnection()
 {
+    std::cout << "Closing all connections..." << std::endl;
+    //close sockets of every client here
+    for(std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+    {
+        close((*it)->getFd());
+        delete *it;
+    }
+    
+    //close socket of server
+    if(this->_srvSoc_fd != -1)
+    {
+        close(_srvSoc_fd);
+    }
+    std::cout << "All connections closed. Server shutdown complete." << std::endl;
+}
 
+void Server::ClearChannels()
+{
+    std::vector<Channel*>::iterator it;
+
+    for(it = channels.begin(); it != channels.end(); it++)
+    {
+        if(*it)
+            delete *it;
+    }
+    channels.clear();
+}
+
+void Server::runSocket()
+{
+    signal(SIGINT, signalHandler);
+    signal(SIGQUIT, signalHandler);
+    initSocket();
+    std::cout << "Server Launched and listening on port " << _config.port << std::endl;
+}
+
+void Server::StartServer()
+{
+    //call run socket. create event loop, if client new create it, if not receive his data, if signal received, shut down server
+    runSocket();
+    while(!sig)
+    {
+        if(poll(fds.data(), fds.size(), -1) == -1 && !sig)
+        {
+            perror("poll");
+            break;
+        }
+        for(size_t i = 0; i < fds.size(); i++)
+        {
+            if(fds[i].revents & POLLIN)
+            {
+                if(fds[i].fd == _srvSoc_fd)
+                {
+                    //add new client
+                    addNewClient();
+                }
+                else
+                {
+                    //receive data from existing client
+                    receiveData(fds[i].fd);
+                }
+            }
+        }
+    }
+    removeClient(_srvSoc_fd, 1);
+    CloseConnection();
+    ClearChannels();
 }

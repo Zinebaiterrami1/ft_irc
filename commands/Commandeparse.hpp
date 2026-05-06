@@ -10,3 +10,7 @@ class  Commandeparse
 };
 
 
+void execute(const Commandeparse &cmd);
+
+
+

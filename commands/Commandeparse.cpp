@@ -4,6 +4,37 @@
 #include "Commandeparse.hpp"
 // #include "Channel.hpp"
 #include "CommandHandler.hpp"
+
+void execute(const Commandeparse &cmd)
+{
+    std::string c;
+
+    for (size_t i = 0; i <cmd.name.size() ; i++)
+    {
+        c += std::toupper(cmd.name[i]);
+    }
+    // std::cout << "------------->\n" << c << std::endl;
+    if(cmd.name == "JOIN")
+        HandledJOIN(cmd);
+    else if(cmd.name == "PASS")
+        HandledPASS(cmd);
+    else if(cmd.name == "USER")
+        HandledUSER(cmd);
+    
+    else if(cmd.name == "KICK")
+        HandledKICK(cmd);
+    else if(cmd.name == "INVITE")
+         HandledINVITE(cmd);
+    else if(cmd.name == "TOPIC")
+        HandledTOPIC(cmd);
+    else if(cmd.name == "MODE")
+        HandledMODE(cmd);
+    else if(cmd.name == "PRIVMSG")
+        HandledPRIVMSG(cmd);
+
+    else
+        std::cerr << "Unknown Command " << std::endl;
+}
 Commandeparse parser_commande(std::string &line)
 {
     Commandeparse cmd;
@@ -74,6 +105,6 @@ int main()
 
         std::cout << "\nINPUT: " << tests[i] << std::endl;
 
-        handler.execute(cmd);
+        execute(cmd);
     }
 }

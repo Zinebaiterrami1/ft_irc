@@ -1,23 +1,5 @@
 #include "CommandHandler.hpp"
-void CommandHandler::execute(const Commandeparse &cmd)
-{
-    if(cmd.name == "JOIN")
-        HandledJOIN(cmd);
-    else if(cmd.name == "KICK")
-        HandledKICK(cmd);
-    else if(cmd.name == "INVITE")
-         HandledINVITE(cmd);
-    else if(cmd.name == "TOPIC")
-        HandledTOPIC(cmd);
-    else if(cmd.name == "MODE")
-        HandledMODE(cmd);
-    else if(cmd.name == "PRIVMSG")
-        HandledPRIVMSG(cmd);
-
-    else
-        std::cerr << "Unknown Command " << std::endl;
-}
-
+#include<cctype>
 
 
 void CommandHandler::HandledJOIN(const Commandeparse &cmd)

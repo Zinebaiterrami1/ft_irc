@@ -4,7 +4,7 @@ class  CommandHandler
 {
     // public:
     //     void execute(const Commandeparse &cmd);
-    private:
+    public:
         void HandledJOIN(const Commandeparse &cmd);
         void HandledKICK(const Commandeparse &cmd);
         void HandledINVITE(const Commandeparse &cmd);

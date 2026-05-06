@@ -1,37 +1,36 @@
 #include<iostream>
 #include<string>
 #include <vector>
-#include "Commandeparse.hpp"
+#include "../includes/Commandeparse.hpp"
+#include "../includes/CommandHandler.hpp"
 // #include "Channel.hpp"
-#include "CommandHandler.hpp"
+// #include "CommandHandler.hpp"
 
 void execute(const Commandeparse &cmd)
 {
+    CommandHandler handler;
     std::string c;
 
     for (size_t i = 0; i <cmd.name.size() ; i++)
     {
         c += std::toupper(cmd.name[i]);
     }
-    // std::cout << "------------->\n" << c << std::endl;
     if(cmd.name == "JOIN")
-        HandledJOIN(cmd);
-    else if(cmd.name == "PASS")
-        HandledPASS(cmd);
-    else if(cmd.name == "USER")
-        HandledUSER(cmd);
-    
+        handler.HandledJOIN(cmd);
+    // else if(cmd.name == "PASS")
+    //     handler.HandledPASS(cmd);
+    // else if(cmd.name == "USER")
+    //     handler.HandledUSER(cmd);
     else if(cmd.name == "KICK")
-        HandledKICK(cmd);
+        handler.HandledKICK(cmd);
     else if(cmd.name == "INVITE")
-         HandledINVITE(cmd);
+         handler.HandledINVITE(cmd);
     else if(cmd.name == "TOPIC")
-        HandledTOPIC(cmd);
+        handler.HandledTOPIC(cmd);
     else if(cmd.name == "MODE")
-        HandledMODE(cmd);
+        handler.HandledMODE(cmd);
     else if(cmd.name == "PRIVMSG")
-        HandledPRIVMSG(cmd);
-
+        handler.HandledPRIVMSG(cmd);
     else
         std::cerr << "Unknown Command " << std::endl;
 }

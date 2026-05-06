@@ -1,4 +1,4 @@
-#include "Channel.hpp"
+#include "../includes/Channel.hpp"
 
 Channel::Channel()
 : inviteOnly(false), topicRestricted(false), userLimit(-1)

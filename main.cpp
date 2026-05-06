@@ -46,7 +46,7 @@ int main(int ac, char **av)
         std::cerr << "password empty" << std::endl;
         return 1;
     }
-
+    
     std::cout << "Port: " << con.port << std::endl;
     std::cout << "Password: " << con.password << std::endl;
 }

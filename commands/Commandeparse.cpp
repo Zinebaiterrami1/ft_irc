@@ -3,8 +3,7 @@
 #include <vector>
 #include "../includes/Commandeparse.hpp"
 #include "../includes/CommandHandler.hpp"
-// #include "Channel.hpp"
-// #include "CommandHandler.hpp"
+
 
 void execute(const Commandeparse &cmd)
 {
@@ -17,10 +16,14 @@ void execute(const Commandeparse &cmd)
     }
     if(cmd.name == "JOIN")
         handler.HandledJOIN(cmd);
-    // else if(cmd.name == "PASS")
-    //     handler.HandledPASS(cmd);
-    // else if(cmd.name == "USER")
-    //     handler.HandledUSER(cmd);
+    else if(cmd.name == "PASS")
+        handler.HandledPASS(cmd);
+    else if(cmd.name == "USER")
+        handler.HandledUSER(cmd);
+     else if(cmd.name == "NICK")
+        handler.HandledNICK(cmd);  
+    else if(cmd.name == "PART")
+        handler.HandledPART(cmd); 
     else if(cmd.name == "KICK")
         handler.HandledKICK(cmd);
     else if(cmd.name == "INVITE")

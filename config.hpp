@@ -3,6 +3,7 @@
 class config
 {
     public:
-    int port;
-    std::string password;
+        int port;
+        std::string password;
+
 };

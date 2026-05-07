@@ -19,6 +19,8 @@
 # include <arpa/inet.h>
 # include <csignal>
 #include <cstdio>
+# include <sstream>
+
 class Server
 {
     private:

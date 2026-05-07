@@ -106,7 +106,7 @@ bool Server::initSocket()
         return false;
     }
     char hostname[256];
-    if(gethostname(hostname, sizeof(hostname)))
+    if(!gethostname(hostname, sizeof(hostname)))
         server_hostname = hostname;
     else
         server_hostname = "localhost";

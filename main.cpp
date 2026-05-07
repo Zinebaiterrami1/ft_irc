@@ -17,7 +17,7 @@ bool is_valid_port(const std::string &str, int &port )
         if(val > 65535)
             return false;
     }
-    if(val < 1)
+    if(val < 1024)
         return false;
 
     port = static_cast<int>(val);

@@ -31,8 +31,8 @@ void Client::execute(const Commandeparse &cmd)
     {
         c += std::toupper(cmd.name[i]);
     }
-    // if(cmd.name == "JOIN")
-    //     HandledJOIN(cmd);
+    if(cmd.name == "JOIN")
+        HandledJOIN(cmd);
     // else if(cmd.name == "PASS")
     //     handler.HandledPASS(cmd);
     // else if(cmd.name == "USER")

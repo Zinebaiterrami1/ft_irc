@@ -5,10 +5,38 @@
 #include "../includes/Commandeparse.hpp"
 
 
-// void Client::HandledJOIN(const Commandeparse &cmd)
-// {
+void Client::HandledJOIN(const Commandeparse &cmd)
+{
+    try{
 
-// }
+        if(!Authenticated)
+            throw;
+        if(cmd.args.empty()){
+            creat_raply(":" + ser->get_hostname + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
+            throw;
+        }
+        if(!valideArgs(cmd.args))//if no # //existe 
+        {
+            throw;
+        }
+        if(cmd.args.size() == 1 )
+        {
+            if(cmd.args[0] != "0")
+                joinChannel(cmd.args[0], username, ser);//if first client creat channel
+            else 
+                leaveAll(cmd.args[0], username, ser);
+        }
+        else 
+        {//MODE #secret +k hello42   //key == MODE #secret +k hello42
+            std::string *channels = split_Channels(cmd.args);
+            std::string *keys = split_Keys(cmd.args);
+            joinMultiChannl(channels, keys, username, ser);
+        }
+    }
+    catch(...){
+        return;
+    }
+}
 
 // void CommandHandler::HandledKICK(const Commandeparse &cmd)
 // {

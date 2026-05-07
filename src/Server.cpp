@@ -30,6 +30,13 @@ void signalHandler(int signum)
     Server::sig = true;
 }
 
+std::string toString(int value)
+{
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
+
 bool Server::initSocket()
 {
     int status;
@@ -41,7 +48,7 @@ bool Server::initSocket()
     hints.ai_family = AF_UNSPEC; //don't care IPv4 or IPv6
     hints.ai_socktype = SOCK_STREAM; //TCP stream sockets
     hints.ai_flags = AI_PASSIVE; //fill in my IP for me
-    if((status = getaddrinfo(NULL, std::to_string(_config.port).c_str(), &hints, &servinfo)) != 0)
+    if((status = getaddrinfo(NULL, toString(_config.port).c_str(), &hints, &servinfo)) != 0)
     {
         std::cerr << "getaddressinfo " <<  gai_strerror(status) << std::endl;
         return false;

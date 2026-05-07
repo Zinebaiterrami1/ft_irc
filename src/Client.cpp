@@ -9,7 +9,7 @@ int Client::getFd(){
 
 void Client::create_reply(const std::string &buffer)
 {
-    m_buffer += buffer;
+    write_buffer += buffer;
 }
 void Client::set_hostname(const std::string& host)
 {
@@ -32,7 +32,7 @@ void Client::execute(const Commandeparse &cmd)
         c += std::toupper(cmd.name[i]);
     }
     // if(cmd.name == "JOIN")
-    //     handler.HandledJOIN(cmd);
+    //     HandledJOIN(cmd);
     // else if(cmd.name == "PASS")
     //     handler.HandledPASS(cmd);
     // else if(cmd.name == "USER")

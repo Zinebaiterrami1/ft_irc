@@ -1,10 +1,11 @@
 #include "../includes/CommandHandler.hpp"
 #include<cctype>
 #include "../includes/config.hpp"
+#include "../includes/Server.hpp"
 #include "../includes/Commandeparse.hpp"
 
 
-// void CommandHandler::HandledJOIN(const Commandeparse &cmd)
+// void Client::HandledJOIN(const Commandeparse &cmd)
 // {
 
 // }

@@ -151,7 +151,7 @@ void Server::receiveData(int clientFd)
     char tmp[1024];
     tmp[0] = '\0';
     Client &client = *getClient(clientFd);
-    std::string &buffer = client.buffer;
+    std::string &buffer = client.read_buffer;
     
     int bytes = recv(clientFd, tmp, sizeof(tmp)-1, 0);
     tmp[bytes] = '\0';

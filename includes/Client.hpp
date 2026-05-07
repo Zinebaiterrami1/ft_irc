@@ -10,12 +10,11 @@ class Client{
         int fd; //socket du client
         std::string nickname;// if nick
         std::string username;// if user
-        char *hostname;// ip accept() clientAddr.sin_addr
-        bool isRegistred;
-        Server *ser;
-        std::string m_buffer;
         std::string client_hostname;
-
+        std::string read_buffer;//WACH hada dyal response ola req
+        std::string write_buffer;
+        Server *ser;
+        char *hostname;// ip accept() clientAddr.sin_addr
         bool Authenticated;
 
 
@@ -23,13 +22,15 @@ class Client{
         Client(int fd, char *hostname);
         Client () : ser(NULL) , Authenticated(false){}
         ~Client();
-        int getFd();
+
         void set_hostname(const std::string& host);
-        std::string buffer;//WACH hada dyal response ola req
-        std::string response;//WACH hada dyal response ola req
+        
+        int getFd();
+        std::string get_prefix() const;
+        
+        //============================| commande handler |=========================
         void execute(const Commandeparse &cmd);
         void create_reply(const std::string &buffer);
-        std::string get_prefix() const;
         void HandledJOIN(const Commandeparse &cmd);
         void HandledKICK(const Commandeparse &cmd);
         void HandledINVITE(const Commandeparse &cmd);

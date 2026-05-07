@@ -147,6 +147,8 @@ void Server::receiveData(int clientFd)
             //donne a parse commande et execute
             int x = buffer[found-1] != '\r'?0:1;
             std::string cmd = buffer.substr(0, found-x);
+            if(cmd.length() > 510)
+                throw 45;
             buffer = buffer.substr(found+1, buffer.length());
             execute(parser_commande(cmd));
         }

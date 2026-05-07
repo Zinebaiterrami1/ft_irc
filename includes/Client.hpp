@@ -16,6 +16,7 @@ class Client{
         int getFd();
         
         std::string buffer;//WACH hada dyal response ola req
+        std::string response;//WACH hada dyal response ola req
         
         // void setNickname(std::string nickname);
         // void setUsername(std::string username);

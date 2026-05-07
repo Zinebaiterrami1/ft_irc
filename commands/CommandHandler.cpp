@@ -41,8 +41,7 @@ void CommandHandler::HandledPRIVMSG(const Commandeparse &cmd)
     // ila kanet chanel 
     if(target[0] == '#')
     {
-        std::cout << "CHANNEL MSG " << target <<  " :" << message
-        << std::endl;
+        
     }
     else
     {

@@ -119,7 +119,7 @@ void CommandHandler::HandledNICK(const Commandeparse &cmd)
     std::cout <<"nickname" << nick_name << std::endl;
 }
 
-void CommandHandler::HandledPRIVMSG(const Commandeparse &cmd)
+void CommandHandler:: (const Commandeparse &cmd)
 {
     if(cmd.args.size() < 2)
     {
@@ -132,6 +132,7 @@ void CommandHandler::HandledPRIVMSG(const Commandeparse &cmd)
     // ila kanet chanel  KANSIFTO L MSG MAKANCH KANSIFTO PRIVATE
     if(target[0] == '#')
     {
+        
         std::cout << "CHANNEL MSG " << target <<  " :" << message
         << std::endl;
     }

@@ -5,38 +5,7 @@
 #include "../includes/CommandHandler.hpp"
 
 
-void execute(const Commandeparse &cmd)
-{
-    CommandHandler handler;
-    std::string c;
 
-    for (size_t i = 0; i <cmd.name.size() ; i++)
-    {
-        c += std::toupper(cmd.name[i]);
-    }
-    if(cmd.name == "JOIN")
-        handler.HandledJOIN(cmd);
-    else if(cmd.name == "PASS")
-        handler.HandledPASS(cmd);
-    else if(cmd.name == "USER")
-        handler.HandledUSER(cmd);
-     else if(cmd.name == "NICK")
-        handler.HandledNICK(cmd);  
-    else if(cmd.name == "PART")
-        handler.HandledPART(cmd); 
-    else if(cmd.name == "KICK")
-        handler.HandledKICK(cmd);
-    else if(cmd.name == "INVITE")
-         handler.HandledINVITE(cmd);
-    else if(cmd.name == "TOPIC")
-        handler.HandledTOPIC(cmd);
-    else if(cmd.name == "MODE")
-        handler.HandledMODE(cmd);
-    else if(cmd.name == "PRIVMSG")
-        handler.HandledPRIVMSG(cmd);
-    else
-        std::cerr << "Unknown Command " << std::endl;
-}
 Commandeparse parser_commande(std::string &line)
 {
     Commandeparse cmd;
@@ -90,23 +59,23 @@ Commandeparse parser_commande(std::string &line)
     }
     return cmd;
 }
-int main()
-{
-    std::vector<std::string> tests;
+// int main()
+// {
+//     std::vector<std::string> tests;
 
-    // tests.push_back("JOIN #a");
-    // tests.push_back("KICK #a bob :bad user");
-    tests.push_back("PRIVMSG #a :hello world");
-    // tests.push_back("TOPIC #a :new topic");
+//     // tests.push_back("JOIN #a");
+//     // tests.push_back("KICK #a bob :bad user");
+//     tests.push_back("PRIVMSG #a :hello world");
+//     // tests.push_back("TOPIC #a :new topic");
 
-    CommandHandler handler;
+//     CommandHandler handler;
 
-    for (size_t i = 0; i < tests.size(); i++)
-    {
-        Commandeparse cmd = parser_commande(tests[i]);
+//     for (size_t i = 0; i < tests.size(); i++)
+//     {
+//         Commandeparse cmd = parser_commande(tests[i]);
 
-        std::cout << "\nINPUT: " << tests[i] << std::endl;
+//         std::cout << "\nINPUT: " << tests[i] << std::endl;
 
-        execute(cmd);
-    }
-}
+//         execute(cmd);
+//     }
+// }

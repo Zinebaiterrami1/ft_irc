@@ -1,6 +1,8 @@
 #include<iostream>
 #include <cstdlib>
-#include"config.hpp"
+#include <stdexcept>
+#include "includes/config.hpp"
+#include "includes/Server.hpp"
 
 bool is_valid_port(const std::string &str, int &port )
 {
@@ -25,28 +27,33 @@ bool is_valid_port(const std::string &str, int &port )
 
 int main(int ac, char **av)
 {
-    if (ac != 3)
-    {
-        std::cerr << "./ircserv <port> <password>" << std::endl;
-        return 1;
-    }
+        if (ac != 3)
+        {
+            std::cerr << "./ircserv <port> <password>" << std::endl;
+            return 1;
+        }
 
-    config con;
+        config con;
 
-    if (!is_valid_port(av[1], con.port))
-    {
-        std::cerr << "Invalid port" << std::endl;
-        return 1;
-    }
+        if (!is_valid_port(av[1], con.port))
+        {
+            std::cerr << "Invalid port" << std::endl;
+            return 1;
+        }
 
-    con.password = av[2];
+        con.password = av[2];
 
-    if (con.password.empty())
-    {
-        std::cerr << "password empty" << std::endl;
-        return 1;
-    }
-    
-    std::cout << "Port: " << con.port << std::endl;
-    std::cout << "Password: " << con.password << std::endl;
+        if (con.password.empty())
+        {
+            std::cerr << "password empty" << std::endl;
+            return 1;
+        }
+        
+        std::cout << "Port: " << con.port << std::endl;
+        std::cout << "Password: " << con.password << std::endl;
+
+        Server ser(con);
+        ser.StartServer();
 }
+
+

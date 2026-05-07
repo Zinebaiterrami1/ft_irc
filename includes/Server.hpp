@@ -8,6 +8,7 @@
 # include <sys/socket.h>
 # include "config.hpp"
 # include <cstring>
+# include <map>
 # include <vector>
 # include "../includes/Client.hpp"
 # include "../includes/Channel.hpp"
@@ -28,7 +29,8 @@ class Server
         struct sockaddr_in _address;
         std::vector<Client*> clients;
         std::vector<struct pollfd> fds;
-        std::vector<Channel*> channels;
+        // std::vector<Channel*> channels;
+        std::map<std::string, Channel*> channels;
         std::vector<int> ClientFds;
         config _config;
     public:

@@ -131,7 +131,7 @@ void Server::addNewClient()
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
     clientPollFd.revents = 0;
-    Client *client = new Client(clientFd, inet_ntoa(clientAddr.sin_addr));
+    Client *client = new Client(clientFd);
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
     fds.push_back(clientPollFd);
@@ -236,12 +236,11 @@ void Server::CloseConnection()
 
 void Server::ClearChannels()
 {
-    std::vector<Channel*>::iterator it;
+    std::map<std::string,Channel*>::iterator it;
 
     for(it = channels.begin(); it != channels.end(); it++)
     {
-        if(*it)
-            delete *it;
+            delete it->second;
     }
     channels.clear();
 }

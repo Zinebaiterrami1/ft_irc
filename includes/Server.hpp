@@ -42,7 +42,7 @@ class Server
         std::vector<struct pollfd> fds;
         std::vector<int> ClientFds;
         config _config;
-        std::map<std::string, Channel*> Channels;
+        std::vector<Channel*> Channels;
         std::string server_hostname;
     public:
         static bool sig;
@@ -56,7 +56,7 @@ class Server
         void CloseConnection();
         void runSocket();
         void removeClient(int fd, int flag);
-        // void ClearChannels();
+        void ClearChannels();
         const config& get_config() const { return _config;}
         void StartServer();
         bool nickname_use(const std::string &nick, const Client *cl);

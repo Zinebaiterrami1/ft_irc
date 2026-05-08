@@ -1,27 +1,36 @@
 #include "../includes/Channel.hpp"
-#include<set>
-#include<map>
+#include <iostream>
+
+
 Channel::Channel()
-: inviteOnly(false), topicRestricted(false), userLimit(-1)
+    : name(""), topic(""),
+      inviteOnly(false),
+      topicRestricted(false),
+      userLimit(-1)
 {
 }
 
 Channel::Channel(const std::string &channelName)
-: name(channelName), inviteOnly(false), topicRestricted(false), userLimit(-1)
+    : name(channelName),
+      topic(""),
+      inviteOnly(false),
+      topicRestricted(false),
+      userLimit(-1)
 {
 }
 
 
-void Channel::sed_msg_client(const std::string& msg, Client* cl)
+void Channel::sendMsgClient(const std::string &msg, Client *sender)
 {
-    for(std::set<Client *>::iterator it = users.begin(); it != users.end(); it++ )
+    for (size_t i = 0; i < users.size(); i++)
     {
-        if(*it != cl)
+        if (users[i] != sender)
         {
-            (*it)->create_reply(msg);
+            users[i]->create_reply(msg);
         }
     }
 }
+
 
 std::string Channel::getName() const
 {
@@ -33,16 +42,17 @@ std::string Channel::getTopic() const
     return topic;
 }
 
-void Channel::addUser(const std::string &nickname)
+
+void Channel::addUser(Client *client)
 {
-    users.push_back(nickname);
+    users.push_back(client);
 }
 
-void Channel::removeUser(const std::string &nickname)
+void Channel::removeUser(Client *client)
 {
     for (size_t i = 0; i < users.size(); i++)
     {
-        if (users[i] == nickname)
+        if (users[i] == client)
         {
             users.erase(users.begin() + i);
             return;
@@ -50,30 +60,32 @@ void Channel::removeUser(const std::string &nickname)
     }
 }
 
-bool Channel::hasUser(const std::string &nickname) const
+bool Channel::hasUser(Client *client) const
 {
     for (size_t i = 0; i < users.size(); i++)
     {
-        if (users[i] == nickname)
+        if (users[i] == client)
             return true;
     }
     return false;
 }
 
-void Channel::addOperator(const std::string &nickname)
+
+void Channel::addOperator(Client *client)
 {
-    operators.push_back(nickname);
+    operators.push_back(client);
 }
 
-bool Channel::isOperator(const std::string &nickname) const
+bool Channel::isOperator(Client *client) const
 {
     for (size_t i = 0; i < operators.size(); i++)
     {
-        if (operators[i] == nickname)
+        if (operators[i] == client)
             return true;
     }
     return false;
 }
+
 
 void Channel::setTopic(const std::string &newTopic)
 {
@@ -100,6 +112,7 @@ void Channel::setUserLimit(int limit)
     userLimit = limit;
 }
 
+
 bool Channel::isInviteOnly() const
 {
     return inviteOnly;
@@ -108,4 +121,9 @@ bool Channel::isInviteOnly() const
 int Channel::getUserLimit() const
 {
     return userLimit;
+}
+
+const std::vector<Client *> &Channel::getUsers() const
+{
+    return users;
 }

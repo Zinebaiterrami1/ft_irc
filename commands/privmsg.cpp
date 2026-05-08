@@ -49,8 +49,8 @@ void Client::HandledPRIVMSG(const Commandeparse &cmd)
             ":" + servername + " 404 " + nickname + " " + target + " :Cannot send to channel\r\n");
             return;
         }
-
-        chan->sed_msg_client(msg_send, this);
+        //hadi n9adha
+        // chan->sed_msg_client(msg_send, this);
     }
     else
     {

@@ -1,7 +1,17 @@
 #include "../includes/Server.hpp"
 
-Client::Client(int fd, char* hostname) : fd(fd), hostname(hostname), isRegistred(false), c_nick(false), c_password(false), c_user(false){}
-
+Client::Client(int fd, char* hostnamee)
+: fd(fd),
+  nickname(""),
+  username(""),
+  hostname(hostnamee),
+  client_hostname("127.0.0.1"),
+  c_channels(),
+  Authenticated(false),
+  c_password(false),
+  c_user(false),
+  c_nick(false)
+{}
 Client::~Client(){}
 
 
@@ -9,10 +19,10 @@ int Client::getFd(){
     return fd;
 }
 
-void Client::create_reply(const std::string &buffer)
-{
-    write_buffer += buffer;
-}
+// void Client::create_reply(const std::string &buffer)
+// {
+//     write_buffer += buffer;
+// }
 void Client::set_hostname(const std::string& host)
 {
     client_hostname = host;

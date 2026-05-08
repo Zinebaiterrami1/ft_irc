@@ -15,20 +15,23 @@ Server::~Server()
 }
 Channel* Server::get_channel(const std::string &name)
 {
-    std::map<std::string, Channel*>::iterator it  = Channels.find(name);
-    if( it != Channels.end())
-        return it->second;
-
+    for (size_t i = 0; i < Channels.size(); i++)
+    {
+        if (Channels[i]->getName() == name)
+            return Channels[i];
+    }
     return NULL;
 }
-
-Channel* Server::create_channel(const std::string& name)
+Channel* Server::create_channel(const std::string &name)
 {
-    Channel* ch = get_channel(name);
-    if(!ch)
-        return ch;
-    ch = new Channel(name);
-    Channels[name] = ch;
+    for (size_t i = 0; i < Channels.size(); i++)
+    {
+        if (Channels[i]->getName() == name)
+            return Channels[i];
+    }
+
+    Channel *ch = new Channel(name);
+    Channels.push_back(ch);
     return ch;
 }
 
@@ -177,7 +180,7 @@ void Server::addNewClient()
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
     clientPollFd.revents = 0;
-    Client *client = new Client(clientFd);
+    Client *client = new Client(clientFd); //tat2kedo mnha 7it lmochkil fconstruct dakci 3elach zedtha
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
     fds.push_back(clientPollFd);
@@ -284,13 +287,11 @@ void Server::CloseConnection()
 
 void Server::ClearChannels()
 {
-    std::map<std::string,Channel*>::iterator it;
-
-    for(it = channels.begin(); it != channels.end(); it++)
+    for (size_t i = 0; i < Channels.size(); i++)
     {
-            delete it->second;
+        delete Channels[i];
     }
-    channels.clear();
+    Channels.clear();
 }
 
 void Server::runSocket()

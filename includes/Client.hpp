@@ -34,7 +34,7 @@ class Client{
         void create_reply(const std::string &buffer);
 
         bool in_channel(Channel *chan) const;
-        
+        const std::string &get_nickname() const { return nickname;}
         std::string get_prefix() const;
         void HandledJOIN(const Commandeparse &cmd);
         void HandledKICK(const Commandeparse &cmd);

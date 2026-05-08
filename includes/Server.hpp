@@ -61,7 +61,7 @@ class Server
         const std::string &get_hostname() const {return server_hostname;}
         Channel *get_channel(const std::string &name);
         Channel *create_channel(const std::string& name);
-
+        Client *find_nicknameclient(const std::string &nick);
 };
 
 

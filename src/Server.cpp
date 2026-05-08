@@ -41,6 +41,18 @@ Client *Server::getClient(int fd){
         return NULL;
 }
 
+Client* Server::find_nicknameclient(const std::string &nick)
+{
+    for(std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+    {
+        if((*it)->get_nickname() == nick)
+        {
+            return *it;
+        }
+    }
+    return NULL;
+}
+
 void signalHandler(int signum)
 {
     (void)signum;

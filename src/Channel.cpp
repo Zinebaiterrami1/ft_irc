@@ -1,5 +1,6 @@
 #include "../includes/Channel.hpp"
 #include<set>
+#include<map>
 Channel::Channel()
 : inviteOnly(false), topicRestricted(false), userLimit(-1)
 {

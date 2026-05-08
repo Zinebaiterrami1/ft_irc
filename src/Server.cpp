@@ -293,5 +293,5 @@ void Server::StartServer()
     }
     removeClient(_srvSoc_fd, 1);
     CloseConnection();
-    // ClearChannels();
+    ClearChannels();
 }

@@ -2,14 +2,18 @@
 
 #include <string>
 #include <vector>
+#include "../includes/Client.hpp"
+
+class Client;
 
 class Channel
 {
 private:
     std::string name;
     std::string topic;
-    std::vector<std::string> users;
-    std::vector<std::string> operators;
+
+    std::vector<Client *> users;
+    std::vector<Client *> operators;
 
     bool inviteOnly;
     bool topicRestricted;
@@ -23,12 +27,12 @@ public:
     std::string getName() const;
     std::string getTopic() const;
 
-    void addUser(const std::string &nickname);
-    void removeUser(const std::string &nickname);
-    bool hasUser(const std::string &nickname) const;
+    void addUser(Client *client);
+    void removeUser(Client *client);
+    bool hasUser(Client *client) const;
 
-    void addOperator(const std::string &nickname);
-    bool isOperator(const std::string &nickname) const;
+    void addOperator(Client *client);
+    bool isOperator(Client *client) const;
 
     void setTopic(const std::string &newTopic);
 
@@ -39,4 +43,8 @@ public:
 
     bool isInviteOnly() const;
     int getUserLimit() const;
+
+    const std::vector<Client *> &getUsers() const;
+
+    void sendMsgClient(const std::string &msg, Client *sender);
 };

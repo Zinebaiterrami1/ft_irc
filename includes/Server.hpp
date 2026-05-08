@@ -8,6 +8,7 @@
 # include <sys/socket.h>
 # include "config.hpp"
 # include <cstring>
+# include <map>
 # include <vector>
 # include "../includes/Client.hpp"
 # include "../includes/Channel.hpp"
@@ -39,10 +40,9 @@ class Server
         struct sockaddr_in _address;
         std::vector<Client*> clients;
         std::vector<struct pollfd> fds;
-        // std::vector<Channel*> channels;
         std::vector<int> ClientFds;
         config _config;
-        std::map<std::string, Channel*> Channels;
+        std::vector<Channel*> Channels;
         std::string server_hostname;
     public:
         static bool sig;
@@ -56,10 +56,14 @@ class Server
         void CloseConnection();
         void runSocket();
         void removeClient(int fd, int flag);
-        // void ClearChannels();
+        void ClearChannels();
+        const config& get_config() const { return _config;}
         void StartServer();
+        bool nickname_use(const std::string &nick, const Client *cl);
         const std::string &get_hostname() const {return server_hostname;}
         Channel *get_channel(const std::string &name);
+        Channel *create_channel(const std::string& name);
+        Client *find_nicknameclient(const std::string &nick);
 };
 
 

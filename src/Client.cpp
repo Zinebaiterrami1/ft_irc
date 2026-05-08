@@ -1,7 +1,9 @@
 #include "../includes/Server.hpp"
 
 Client::Client(int fd, char* hostname) : fd(fd), hostname(hostname), isRegistred(false){}
+
 Client::~Client(){}
+
 
 int Client::getFd(){
     return fd;
@@ -20,6 +22,11 @@ void Client::set_hostname(const std::string& host)
 std::string Client::get_prefix() const
 {
     return nickname + "!" + username + "@" + client_hostname;
+}
+
+bool Client::in_channel(Channel *chan) const
+{
+    return c_channels.find(chan) != c_channels.end();
 }
 
 void Client::execute(const Commandeparse &cmd)

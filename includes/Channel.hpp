@@ -1,15 +1,17 @@
 #pragma once
 
 #include <string>
+#include "../includes/Client.hpp"
 #include <vector>
+class Client;
 
 class Channel
 {
 private:
     std::string name;
     std::string topic;
-    std::vector<std::string> users;
-    std::vector<std::string> operators;
+    std::set<Client *> users;
+    std::set<Client *> operators;
 
     bool inviteOnly;
     bool topicRestricted;
@@ -39,4 +41,9 @@ public:
 
     bool isInviteOnly() const;
     int getUserLimit() const;
+    const std::set<Client *> &get_users()const
+    {
+        return users;
+    }
+    void sed_msg_client(const std::string&msg, Client* cl);
 };

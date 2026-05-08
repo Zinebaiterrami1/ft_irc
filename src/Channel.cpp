@@ -1,5 +1,5 @@
 #include "../includes/Channel.hpp"
-
+#include<set>
 Channel::Channel()
 : inviteOnly(false), topicRestricted(false), userLimit(-1)
 {
@@ -8,6 +8,18 @@ Channel::Channel()
 Channel::Channel(const std::string &channelName)
 : name(channelName), inviteOnly(false), topicRestricted(false), userLimit(-1)
 {
+}
+
+
+void Channel::sed_msg_client(const std::string& msg, Client* cl)
+{
+    for(std::set<Client *>::iterator it = users.begin(); it != users.end(); it++ )
+    {
+        if(*it != cl)
+        {
+            (*it)->create_reply(msg);
+        }
+    }
 }
 
 std::string Channel::getName() const

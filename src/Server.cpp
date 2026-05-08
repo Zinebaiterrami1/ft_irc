@@ -40,6 +40,18 @@ Client *Server::getClient(int fd){
         }
         return NULL;
 }
+bool Server::nickname_use(const std::string &nick, const Client *cl)
+{
+    for(std::vector<Client *>::iterator it = clients.begin(); it != clients.end() ; it++)
+    {
+        const Client *c = (*it);
+        if(c == cl)
+            continue;
+        if(c->get_nickname() == nick)
+            return true;
+    }
+    return false;
+}
 
 Client* Server::find_nicknameclient(const std::string &nick)
 {

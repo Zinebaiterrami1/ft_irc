@@ -1,6 +1,6 @@
 #include "../includes/Server.hpp"
 
-Client::Client(int fd, char* hostname) : fd(fd), hostname(hostname), isRegistred(false){}
+Client::Client(int fd, char* hostname) : fd(fd), hostname(hostname), isRegistred(false), c_nick(false), c_password(false), c_user(false){}
 
 Client::~Client(){}
 
@@ -18,6 +18,17 @@ void Client::set_hostname(const std::string& host)
     client_hostname = host;
 }
 
+void Client::check_register()
+{
+    if(!c_password && c_nick && c_user && !Authenticated)
+    {
+        Authenticated = true;
+        std::string servername = ser->get_hostname();
+        ser->sendData(getFd() ,":" + servername + " 001 " + nickname + " :Welcome to ft_irc server " + nickname + "@" + username + "\r\n");
+        ser->sendData(getFd(),":" + servername + " 002 " + nickname + " :Your host is " + servername + ", running version 1.0\r\n");
+        ser->sendData(getFd(), ":" + servername + " 003 " + nickname + " :This server was created " + std::string(__DATE__) + "\r\n");
+    }
+}
 
 std::string Client::get_prefix() const
 {

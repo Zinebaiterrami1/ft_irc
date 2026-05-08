@@ -16,15 +16,17 @@ class Client{
         Server *ser;
         std::string m_buffer;
         std::string client_hostname;
-
-        bool Authenticated;
         std::set<Channel*> c_channels;
 
+        bool Authenticated;
+        bool c_password; 
+        bool c_user;
+        bool c_nick;
 
     public :
         // Client();
         Client(int fd, char *hostname);
-        Client () : ser(NULL) , Authenticated(false), client_hostname("127.0.0.1"){}
+        Client () : ser(NULL) , Authenticated(false), client_hostname("127.0.0.1"), c_nick(false), c_password(false), c_user(false){}
         ~Client();
         int getFd();
         void set_hostname(const std::string& host);
@@ -36,6 +38,7 @@ class Client{
         bool in_channel(Channel *chan) const;
         const std::string &get_nickname() const { return nickname;}
         std::string get_prefix() const;
+        void check_register();
         void HandledJOIN(const Commandeparse &cmd);
         void HandledKICK(const Commandeparse &cmd);
         void HandledINVITE(const Commandeparse &cmd);

@@ -67,7 +67,39 @@ Client* Server::find_nicknameclient(const std::string &nick)
     }
     return NULL;
 }
+void Server::message_to_all_channel_commun(Client *cl, const std::string &msg)
+{
+    if (!cl)
+        return;
 
+    std::set<Client *> notified;
+
+    const std::set<Channel *> &channels = cl->c_channels;
+
+    for (std::set<Channel *>::const_iterator it = channels.begin();
+         it != channels.end();
+         ++it)
+    {
+        Channel *ch = *it;
+        if (!ch)
+            continue;
+
+        const std::vector<Client *> &members = ch->getUsers();
+
+        for (size_t j = 0; j < members.size(); j++)
+        {
+            Client *recipient = members[j];
+
+            if (!recipient || recipient == cl)
+                continue;
+
+            if (notified.insert(recipient).second)
+            {
+                sendData(recipient->getFd(), msg);
+            }
+        }
+    }
+}
 void signalHandler(int signum)
 {
     (void)signum;

@@ -20,13 +20,15 @@ Channel::Channel(const std::string &channelName)
 }
 
 
-void Channel::sendMsgClient(const std::string &msg, Client *sender)
+void Channel::sendMsgClient(const std::string &msg, Client *sender, Server *ser)
 {
     for (size_t i = 0; i < users.size(); i++)
     {
-        if (users[i] != sender)
+        Client *recipient = users[i];
+
+        if (recipient && recipient != sender)
         {
-            users[i]->create_reply(msg);
+            ser->sendData(recipient->getFd(), msg);
         }
     }
 }

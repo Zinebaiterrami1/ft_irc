@@ -12,6 +12,7 @@ class Client{
         std::string nickname;// if nick
         std::string username;// if user
         std::string hostname;
+        std::string realname;
         std::string client_hostname;
         std::set<Channel*> c_channels;
         std::string read_buffer;

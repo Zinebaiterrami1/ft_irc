@@ -64,6 +64,7 @@ class Server
         Channel *get_channel(const std::string &name);
         Channel *create_channel(const std::string& name);
         Client *find_nicknameclient(const std::string &nick);
+        void message_to_all_channel_commun(Client *cl,const std::string& mesg );
 };
 
 

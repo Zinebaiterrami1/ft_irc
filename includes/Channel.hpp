@@ -5,7 +5,7 @@
 #include "../includes/Client.hpp"
 
 class Client;
-
+class Server;
 class Channel
 {
 private:
@@ -14,7 +14,7 @@ private:
 
     std::vector<Client *> users;
     std::vector<Client *> operators;
-
+    // Client *cl;
     bool inviteOnly;
     bool topicRestricted;
     std::string key;
@@ -46,5 +46,5 @@ public:
 
     const std::vector<Client *> &getUsers() const;
 
-    void sendMsgClient(const std::string &msg, Client *sender);
+void sendMsgClient(const std::string &msg, Client *sender, Server *ser);
 };

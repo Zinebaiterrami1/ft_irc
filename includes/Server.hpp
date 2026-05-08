@@ -40,7 +40,6 @@ class Server
         struct sockaddr_in _address;
         std::vector<Client*> clients;
         std::vector<struct pollfd> fds;
-        // std::vector<Channel*> channels;
         std::vector<int> ClientFds;
         config _config;
         std::map<std::string, Channel*> Channels;
@@ -58,9 +57,13 @@ class Server
         void runSocket();
         void removeClient(int fd, int flag);
         // void ClearChannels();
+        const config& get_config() const { return _config;}
         void StartServer();
+        bool nickname_use(const std::string &nick, const Client *cl);
         const std::string &get_hostname() const {return server_hostname;}
         Channel *get_channel(const std::string &name);
+        Channel *create_channel(const std::string& name);
+        Client *find_nicknameclient(const std::string &nick);
 };
 
 

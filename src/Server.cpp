@@ -13,10 +13,24 @@ Server::~Server()
     if(_srvSoc_fd != -1)
         close(_srvSoc_fd);
 }
-// Channel* Server::get_channel(const std::string &name)
-// {
-//     std::map<std::string, Channel*>::iteratpr it 
-// }
+Channel* Server::get_channel(const std::string &name)
+{
+    std::map<std::string, Channel*>::iterator it  = Channels.find(name);
+    if( it != Channels.end())
+        return it->second;
+
+    return NULL;
+}
+
+Channel* Server::create_channel(const std::string& name)
+{
+    Channel* ch = get_channel(name);
+    if(!ch)
+        return ch;
+    ch = new Channel(name);
+    Channels[name] = ch;
+    return ch;
+}
 
 Client *Server::getClient(int fd){
         std::vector<Client *>::iterator it = clients.begin();
@@ -25,6 +39,30 @@ Client *Server::getClient(int fd){
                         return *it;
         }
         return NULL;
+}
+bool Server::nickname_use(const std::string &nick, const Client *cl)
+{
+    for(std::vector<Client *>::iterator it = clients.begin(); it != clients.end() ; it++)
+    {
+        const Client *c = (*it);
+        if(c == cl)
+            continue;
+        if(c->get_nickname() == nick)
+            return true;
+    }
+    return false;
+}
+
+Client* Server::find_nicknameclient(const std::string &nick)
+{
+    for(std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+    {
+        if((*it)->get_nickname() == nick)
+        {
+            return *it;
+        }
+    }
+    return NULL;
 }
 
 void signalHandler(int signum)

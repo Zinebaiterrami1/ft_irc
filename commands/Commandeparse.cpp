@@ -3,37 +3,9 @@
 #include <vector>
 #include "../includes/Commandeparse.hpp"
 #include "../includes/CommandHandler.hpp"
-// #include "Channel.hpp"
-// #include "CommandHandler.hpp"
 
-void execute(const Commandeparse &cmd)
-{
-    CommandHandler handler;
-    std::string c;
 
-    for (size_t i = 0; i <cmd.name.size() ; i++)
-    {
-        c += std::toupper(cmd.name[i]);
-    }
-    // if(cmd.name == "JOIN")
-    //     handler.HandledJOIN(cmd);
-    // else if(cmd.name == "PASS")
-    //     handler.HandledPASS(cmd);
-    // else if(cmd.name == "USER")
-    //     handler.HandledUSER(cmd);
-    // else if(cmd.name == "KICK")
-    //     handler.HandledKICK(cmd);
-    // else if(cmd.name == "INVITE")
-    //      handler.HandledINVITE(cmd);
-    // else if(cmd.name == "TOPIC")
-    //     handler.HandledTOPIC(cmd);
-    // else if(cmd.name == "MODE")
-    //     handler.HandledMODE(cmd);
-    if(cmd.name == "PRIVMSG")
-        handler.HandledPRIVMSG(cmd);
-    else
-        std::cerr << "Unknown Command " << std::endl;
-}
+
 Commandeparse parser_commande(std::string &line)
 {
     Commandeparse cmd;

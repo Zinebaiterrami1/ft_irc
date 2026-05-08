@@ -13,6 +13,10 @@ Server::~Server()
     if(_srvSoc_fd != -1)
         close(_srvSoc_fd);
 }
+// Channel* Server::get_channel(const std::string &name)
+// {
+//     std::map<std::string, Channel*>::iteratpr it 
+// }
 
 Client *Server::getClient(int fd){
         std::vector<Client *>::iterator it = clients.begin();
@@ -101,7 +105,11 @@ bool Server::initSocket()
         close(_srvSoc_fd);
         return false;
     }
-    
+    char hostname[256];
+    if(!gethostname(hostname, sizeof(hostname)))
+        server_hostname = hostname;
+    else
+        server_hostname = "localhost";
     struct pollfd ev;
 
     ev.fd = _srvSoc_fd;
@@ -143,7 +151,7 @@ void Server::receiveData(int clientFd)
     char tmp[1024];
     tmp[0] = '\0';
     Client &client = *getClient(clientFd);
-    std::string &buffer = client.buffer;
+    std::string &buffer = client.read_buffer;
     
     int bytes = recv(clientFd, tmp, sizeof(tmp)-1, 0);
     tmp[bytes] = '\0';
@@ -154,8 +162,10 @@ void Server::receiveData(int clientFd)
             //donne a parse commande et execute
             int x = buffer[found-1] != '\r'?0:1;
             std::string cmd = buffer.substr(0, found-x);
+            if(cmd.length() > 510)
+                throw 45;
             buffer = buffer.substr(found+1, buffer.length());
-            execute(parser_commande(cmd));
+            client.execute(parser_commande(cmd));
         }
     }
     else if(bytes == 0){//connection close //remove client
@@ -283,5 +293,5 @@ void Server::StartServer()
     }
     removeClient(_srvSoc_fd, 1);
     CloseConnection();
-    ClearChannels();
+    // ClearChannels();
 }

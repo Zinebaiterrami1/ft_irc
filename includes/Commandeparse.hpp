@@ -10,7 +10,6 @@ class  Commandeparse
 };
 
 
-void execute(const Commandeparse &cmd);
 Commandeparse parser_commande(std::string &line);
 
 

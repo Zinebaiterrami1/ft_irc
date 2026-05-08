@@ -21,7 +21,18 @@
 # include <csignal>
 #include <cstdio>
 # include <sstream>
+#include <map>
 
+#define RED "\e[1;31m"
+#define WHI "\e[0;37m"
+#define GRE "\e[1;32m"
+#define BROW "\e[1;33m"
+#define MAG "\e[1;35m"
+#define CYN "\e[1;36m"
+#define RESET "\e[0m"
+
+class Client;
+class Channel;
 class Server
 {
     private:
@@ -30,9 +41,14 @@ class Server
         std::vector<Client*> clients;
         std::vector<struct pollfd> fds;
         // std::vector<Channel*> channels;
+<<<<<<< HEAD
         std::map<std::string, Channel*> channels;
+=======
+>>>>>>> 2f8774d648c86b94a74b94e6c5a803af928daa68
         std::vector<int> ClientFds;
         config _config;
+        std::map<std::string, Channel*> Channels;
+        std::string server_hostname;
     public:
         static bool sig;
         Server(const config &cfg);
@@ -45,8 +61,10 @@ class Server
         void CloseConnection();
         void runSocket();
         void removeClient(int fd, int flag);
-        void ClearChannels();
+        // void ClearChannels();
         void StartServer();
+        const std::string &get_hostname() const {return server_hostname;}
+        Channel *get_channel(const std::string &name);
 };
 
 

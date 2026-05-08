@@ -50,3 +50,60 @@ void Client::execute(const Commandeparse &cmd)
     else
         std::cerr << "Unknown Command " << std::endl;
 }
+
+std::string Client::getClientUserName() const
+{
+    return username;
+}
+
+std::string Client::getClientNickName() const
+{
+    return nickname;
+}
+
+void Client::setClientUserName(std::string uname) const
+{
+    username = uname;
+}
+
+void Client::setClientNickName(std::string nname) const
+{
+    username = nname;
+}
+
+void Client::botJoinChannel(Channel *channel)
+{
+    if(!hasBot())
+    {
+        //bot join logic, 
+        channel->addClient(bot);
+        //🔥 Then optionally broadcast JOIN message
+        std::string joinmssg = ":" + bot->get_prefix() + "@server JOIN " + channel->getName()
+                                + "\r\n";
+        broadcastmessage(channel, joinmssg);
+    }
+}
+
+void Client::HandleBOT(Channel* channel, std::string mssg)
+{
+    std::string replay;
+
+    if(mssg == "!hello")
+    {
+        replay = ;
+    }
+    else if(mssg == "!dice")
+    {
+        replay = ;
+    }
+    else if(mssg == "!help")
+    {
+        replay = ;
+    }
+    else if(mssg == "!time")
+    {
+        replay = ;
+    }
+    if(!replay.empty())
+        broadcastmssg(channel, replay);
+}

@@ -41,10 +41,6 @@ class Server
         std::vector<Client*> clients;
         std::vector<struct pollfd> fds;
         // std::vector<Channel*> channels;
-<<<<<<< HEAD
-        std::map<std::string, Channel*> channels;
-=======
->>>>>>> 2f8774d648c86b94a74b94e6c5a803af928daa68
         std::vector<int> ClientFds;
         config _config;
         std::map<std::string, Channel*> Channels;

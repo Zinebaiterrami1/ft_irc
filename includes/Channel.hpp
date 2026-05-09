@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "../includes/Client.hpp"
-
+#include<set>
 class Client;
 class Server;
 class Channel
@@ -14,7 +14,7 @@ private:
 
     std::vector<Client *> users;
     std::vector<Client *> operators;
-    // Client *cl;
+    std::set<std::string> invited;
     bool inviteOnly;
     bool topicRestricted;
     std::string key;
@@ -42,8 +42,9 @@ public:
     void setUserLimit(int limit);
 
     bool isInviteOnly() const;
+    bool istopicRestricted() const {return topicRestricted;}
     int getUserLimit() const;
-
+    void add_invite(const std::string& nickname);
     const std::vector<Client *> &getUsers() const;
 
 void sendMsgClient(const std::string &msg, Client *sender, Server *ser);

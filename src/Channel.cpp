@@ -129,3 +129,8 @@ const std::vector<Client *> &Channel::getUsers() const
 {
     return users;
 }
+
+void Channel::add_invite(const std::string& nickname)
+{
+    invited.insert(nickname);
+}

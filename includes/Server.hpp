@@ -57,6 +57,7 @@ class Server
         void runSocket();
         void removeClient(int fd, int flag);
         void ClearChannels();
+        void delete_channel(const std::string& name);
         const config& get_config() const { return _config;}
         void StartServer();
         bool nickname_use(const std::string &nick, const Client *cl);

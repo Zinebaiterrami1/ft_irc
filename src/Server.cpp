@@ -34,6 +34,20 @@ Channel* Server::create_channel(const std::string &name)
     Channels.push_back(ch);
     return ch;
 }
+void Server::delete_channel(const std::string& name)
+{
+    for (std::vector<Channel*>::iterator it = Channels.begin();
+         it != Channels.end();
+         ++it)
+    {
+        if ((*it)->getName() == name)
+        {
+            delete *it;          
+            Channels.erase(it); 
+            return;
+        }
+    }
+}
 
 Client *Server::getClient(int fd){
         std::vector<Client *>::iterator it = clients.begin();
@@ -212,7 +226,10 @@ void Server::addNewClient()
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
     clientPollFd.revents = 0;
-    Client *client = new Client(clientFd); //tat2kedo mnha 7it lmochkil fconstruct dakci 3elach zedtha
+    Client *client = new Client(
+    clientFd,
+    inet_ntoa(clientAddr.sin_addr));
+    client->ser = this;
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
     fds.push_back(clientPollFd);

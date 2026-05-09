@@ -9,7 +9,8 @@ void Client::HandledPASS(const Commandeparse &cmd)
 {
     if(c_password)
     {
-        ser->sendData(getFd(),":" + ser->get_hostname() + " 462 " + nickname +" :You may not reregister\r\n");
+        std::cout <<ser->get_hostname() << std::endl;
+        ser->sendData(getFd(),":" + ser->get_hostname() + " 462 " + nickname +" :You mayYou may not reregister\r\n");
         return ;
     }
     if(cmd.args.empty())

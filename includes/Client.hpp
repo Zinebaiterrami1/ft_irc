@@ -24,8 +24,9 @@ class Client{
 
     public :
         Client(int fd, char *hostname);
+        // Client();
         ~Client();
-        Client(int fd) : fd(fd) {}
+        // Client(int fd) : fd(fd) {}
 
         void set_hostname(const std::string& host);
         
@@ -38,6 +39,8 @@ class Client{
         bool in_channel(Channel *chan) const;
         const std::string &get_nickname() const { return nickname;}
         void check_register();
+        void renoveChannel(Channel *chan);
+        void delete_channel(const std::string& name);
         void HandledJOIN(const Commandeparse &cmd);
         void HandledKICK(const Commandeparse &cmd);
         void HandledINVITE(const Commandeparse &cmd);

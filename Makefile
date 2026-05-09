@@ -1,6 +1,6 @@
 NAME = ircserv
 CXX = g++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
 
 # Utilise la fonction wildcard pour lister les fichiers
 SRC = $(wildcard src/*.cpp) $(wildcard commands/*.cpp) main.cpp

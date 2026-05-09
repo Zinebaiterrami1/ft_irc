@@ -44,7 +44,7 @@ class Server
         std::map<std::string, Channel*> channels;
         std::vector<int> ClientFds;
         config _config;
-        std::map<std::string, Channel*> Channels;
+        std::vector<Channel*> Channels;
         std::string server_hostname;
         Client *bot;
     public:
@@ -59,12 +59,16 @@ class Server
         void CloseConnection();
         void runSocket();
         void removeClient(int fd, int flag);
-        // void ClearChannels();
+        void ClearChannels();
+        const config& get_config() const { return _config;}
         void StartServer();
+        bool nickname_use(const std::string &nick, const Client *cl);
         const std::string &get_hostname() const {return server_hostname;}
         Channel *get_channel(const std::string &name);
         void initBot();
         bool hasBot() const;
+        Channel *create_channel(const std::string& name);
+        Client *find_nicknameclient(const std::string &nick);
 };
 
 

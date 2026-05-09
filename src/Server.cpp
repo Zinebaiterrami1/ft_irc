@@ -13,10 +13,27 @@ Server::~Server()
     if(_srvSoc_fd != -1)
         close(_srvSoc_fd);
 }
-// Channel* Server::get_channel(const std::string &name)
-// {
-//     std::map<std::string, Channel*>::iteratpr it 
-// }
+Channel* Server::get_channel(const std::string &name)
+{
+    for (size_t i = 0; i < Channels.size(); i++)
+    {
+        if (Channels[i]->getName() == name)
+            return Channels[i];
+    }
+    return NULL;
+}
+Channel* Server::create_channel(const std::string &name)
+{
+    for (size_t i = 0; i < Channels.size(); i++)
+    {
+        if (Channels[i]->getName() == name)
+            return Channels[i];
+    }
+
+    Channel *ch = new Channel(name);
+    Channels.push_back(ch);
+    return ch;
+}
 
 Client *Server::getClient(int fd){
         std::vector<Client *>::iterator it = clients.begin();
@@ -25,6 +42,30 @@ Client *Server::getClient(int fd){
                         return *it;
         }
         return NULL;
+}
+bool Server::nickname_use(const std::string &nick, const Client *cl)
+{
+    for(std::vector<Client *>::iterator it = clients.begin(); it != clients.end() ; it++)
+    {
+        const Client *c = (*it);
+        if(c == cl)
+            continue;
+        if(c->get_nickname() == nick)
+            return true;
+    }
+    return false;
+}
+
+Client* Server::find_nicknameclient(const std::string &nick)
+{
+    for(std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+    {
+        if((*it)->get_nickname() == nick)
+        {
+            return *it;
+        }
+    }
+    return NULL;
 }
 
 void signalHandler(int signum)
@@ -139,7 +180,7 @@ void Server::addNewClient()
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
     clientPollFd.revents = 0;
-    Client *client = new Client(clientFd);
+    Client *client = new Client(clientFd); //tat2kedo mnha 7it lmochkil fconstruct dakci 3elach zedtha
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
     fds.push_back(clientPollFd);
@@ -246,13 +287,11 @@ void Server::CloseConnection()
 
 void Server::ClearChannels()
 {
-    std::map<std::string,Channel*>::iterator it;
-
-    for(it = channels.begin(); it != channels.end(); it++)
+    for (size_t i = 0; i < Channels.size(); i++)
     {
-            delete it->second;
+        delete Channels[i];
     }
-    channels.clear();
+    Channels.clear();
 }
 
 void Server::runSocket()

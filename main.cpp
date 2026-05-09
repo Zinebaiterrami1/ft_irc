@@ -27,6 +27,7 @@ bool is_valid_port(const std::string &str, int &port )
 
 int main(int ac, char **av)
 {
+        srand(time(0));
         if (ac != 3)
         {
             std::cerr << "./ircserv <port> <password>" << std::endl;

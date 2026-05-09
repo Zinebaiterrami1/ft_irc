@@ -108,30 +108,43 @@ void Client::botJoinChannel(Channel *channel)
         //🔥 Then optionally broadcast JOIN message
         std::string joinmssg = ":" + bot->get_prefix() + "@server JOIN " + channel->getName()
                                 + "\r\n";
-        broadcastmessage(channel, joinmssg);
+        sendMsgClient(joinmssg, bot);
     }
 }
 
-void Client::HandleBOT(Channel* channel, std::string mssg)
+void Client::HandleBOT(std::string mssg)
 {
     std::string replay;
 
     if(mssg == "!hello")
     {
-        replay = ;
+        replay = ":" + bot->getClientNickName() + "!" + bot->getClientUserName() + "@server PRIVMSG " + channel->getName()
+                + "Hi There 👋​";
     }
     else if(mssg == "!dice")
     {
-        replay = ;
+        int random_num = rand() % 101; //give random number 0 - 100
+        //convert int to string
+        std::stringstream ss;
+        ss << random_num;
+        std::string num_str = ss.str();
+
+        replay = ":" + bot->getClientNickName() + "!" + bot->getClientUserName() + "@server PRIVMSG " + channel->getName()
+                + "random number 🎲(0 - 100)​: " + num_str + "\r\n";
     }
     else if(mssg == "!help")
     {
-        replay = ;
+        replay = ":" + bot->getClientNickName() + "!" + bot->getClientUserName() + "@server PRIVMSG " + channel->getName()
+                + "👀​ Commands: !hello, !help, !dice, !time" + "\r\n";
     }
     else if(mssg == "!time")
     {
-        replay = ;
+        time_t current_time = time(0);
+        char buffer[80];
+        strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localtime(&current_time));
+        replay = ":" + bot->getClientNickName() + "!" + bot->getClientUserName() + "@server PRIVMSG " + channel->getName()
+                + "⏰ Current time is : " + buffer + "\r\n";
     }
     if(!replay.empty())
-        broadcastmssg(channel, replay);
+        sendMsgClient(replay, bot);
 }

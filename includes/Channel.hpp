@@ -11,13 +11,13 @@ class Channel
 private:
     std::string name;
     std::string topic;
+    std::string key;
 
     std::vector<Client *> users;
     std::vector<Client *> operators;
 
     bool inviteOnly;
     bool topicRestricted;
-    std::string key;
     int userLimit;
 
 public:
@@ -48,3 +48,4 @@ public:
 
     void sendMsgClient(const std::string &msg, Client *sender);
 };
+

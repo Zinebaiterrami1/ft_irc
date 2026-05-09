@@ -19,7 +19,6 @@ Channel::Channel(const std::string &channelName)
 {
 }
 
-
 void Channel::sendMsgClient(const std::string &msg, Client *sender)
 {
     for (size_t i = 0; i < users.size(); i++)
@@ -55,6 +54,14 @@ void Channel::removeUser(Client *client)
         if (users[i] == client)
         {
             users.erase(users.begin() + i);
+            return;
+        }
+    }
+    for (size_t i = 0; i < operators.size(); i++)
+    {
+        if (operators[i] == client)
+        {
+            operators.erase(operators.begin() + i);
             return;
         }
     }

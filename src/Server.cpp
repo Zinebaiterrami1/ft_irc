@@ -13,7 +13,7 @@ Server::~Server()
     if(_srvSoc_fd != -1)
         close(_srvSoc_fd);
 }
-Channel* Server::get_channel(const std::string &name)
+Channel *Server::get_channel(const std::string &name)
 {
     for (size_t i = 0; i < Channels.size(); i++)
     {
@@ -22,13 +22,18 @@ Channel* Server::get_channel(const std::string &name)
     }
     return NULL;
 }
-Channel* Server::create_channel(const std::string &name)
+
+std::vector<Channel*> Server::get_all_channels(){
+    return Channels;
+}
+
+Channel *Server::create_channel(const std::string &name)
 {
-    for (size_t i = 0; i < Channels.size(); i++)
-    {
-        if (Channels[i]->getName() == name)
-            return Channels[i];
-    }
+    // for (size_t i = 0; i < Channels.size(); i++)
+    // {
+    //     if (Channels[i]->getName() == name)
+    //         return Channels[i];
+    // }
 
     Channel *ch = new Channel(name);
     Channels.push_back(ch);

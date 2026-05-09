@@ -62,8 +62,10 @@ class Server
         bool nickname_use(const std::string &nick, const Client *cl);
         const std::string &get_hostname() const {return server_hostname;}
         Channel *get_channel(const std::string &name);
+        std::vector<Channel*> get_all_channels();
         Channel *create_channel(const std::string& name);
         Client *find_nicknameclient(const std::string &nick);
 };
+
 
 

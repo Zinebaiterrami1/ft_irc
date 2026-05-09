@@ -1,12 +1,13 @@
-// #include "../includes/CommandHandler.hpp"
-// #include<cctype>
-// #include "../includes/config.hpp"
-// #include "../includes/Server.hpp"
-// #include "../includes/Commandeparse.hpp"
+#include "../includes/CommandHandler.hpp"
+#include<cctype>
+#include "../includes/config.hpp"
+#include "../includes/Server.hpp"
+#include "../includes/Commandeparse.hpp"
 
-bool valideArgs(std::vector<std::string> args){
+void valideArgs(std::vector<std::string> args)
+{
     if(args[0][0] == '#' && args[0][1] && isalnum(args[0][1])){
-        for(size_t j = 0, args[0][j], j++){
+        for(size_t j = 0; args[0][j]; j++){
             if(args[0][j] == ','){
                 if(args[0][j+1] && args[0][j+1] == '#'){
                     if(args[0][j+2] && isalnum(args[0][j+2]))
@@ -20,8 +21,11 @@ bool valideArgs(std::vector<std::string> args){
     else throw "Channels need '#' at start";
 }
 
-void leavAll(std::string channel, Server &ser){//remove user from serv.channels
-    
+void leaveAll(std::vector<Channel*> channels,Client *client){//remove user from serv.channels
+    for(size_t i = 0; i < channels.size(); i++){
+        if(channels[i]->hasUser(client))
+            channels[i]->removeUser(client);
+    }
 }
 
 std::vector<std::string> split_Channels(std::string channels){//#ch1,#ch2,
@@ -30,7 +34,7 @@ std::vector<std::string> split_Channels(std::string channels){//#ch1,#ch2,
         if(channels[i] == '#'){
             i++;
             size_t next = channels.find('#', i);
-            std::string name = substr(channels[i], next-1);
+            std::string name = channels.substr(i, next-1);
             Splited_channels.push_back(name);
         }
     }
@@ -45,9 +49,25 @@ std::vector<std::string> split_Keys(std::vector<std::string> keys){//key1 key2
     return Splited_keys;
 }
 
-void join_Multi_Channls(std::vector::<std::string> channels, std::vector::<std::string> keys, std::string username, Server ser){
-    for(size_t i = 0; i < channels.size(0); i++){
-        
+// bool channelNotFound(std::vector<Channel*> channels, std::string name){
+//     for(size_t i = 0; i < channels.size(); i++){
+//         if(channels[i]->getName() == name)
+//             return false;
+//     }
+//     return true;
+// }
+
+void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::string> keys, Client *client, Server *ser){
+    // void(keys);
+    for(size_t i = 0; i < channels.size(); i++){
+        if(!ser->get_channel(channels[i])){
+            Channel *newChannel;
+            newChannel = ser->create_channel(channels[i]);
+            newChannel->addOperator(client);
+            newChannel->addUser(client);
+        }
+        else
+            ser->get_channel(channels[i])->addUser(client);
     }
 }
 
@@ -58,24 +78,24 @@ void Client::HandledJOIN(const Commandeparse &cmd)
         if(!Authenticated)
             throw;
         if(cmd.args.empty()){
-            creat_raply(":" + ser->get_hostname + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
-            throw;
+            // creat_reply(":" + ser->get_hostname() + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
+            throw "emty arguments";
         }
 
-        valideArgs(cmd.args, ser)//if no # //existe 
+        valideArgs(cmd.args);//if no # //existe 
 
         if(cmd.args.size() == 1 && cmd.args[0] == "0")
         {
             // if(cmd.args[0] != "0")
             //     joinChannel(cmd.args[0], username, ser);//if first client creat channel
             // else 
-            leaveAll(cmd.args[0], ser);
+            leaveAll(ser->get_all_channels(), this);
         }
         else 
         {//MODE #secret +k hello42   //key == MODE #secret +k hello42
-            std::vector::<std::string> channels = split_Channels(cmd.args[0]);
-            std::vector::<std::string> keys = split_Keys(cmd.args);
-            join_Multi_Channls(channels, keys, username,  ser);//if first client creat channel
+            std::vector<std::string> channels = split_Channels(cmd.args[0]);
+            std::vector<std::string> keys = split_Keys(cmd.args);
+            join_Multi_Channls(channels, keys, this,  ser);//if first client creat channel
         }
     }
     catch(std::string error){

@@ -29,15 +29,29 @@ std::vector<Channel*> Server::get_all_channels(){
 
 Channel *Server::create_channel(const std::string &name)
 {
-    // for (size_t i = 0; i < Channels.size(); i++)
-    // {
-    //     if (Channels[i]->getName() == name)
-    //         return Channels[i];
-    // }
+    for (size_t i = 0; i < Channels.size(); i++)
+    {
+        if (Channels[i]->getName() == name)
+            return Channels[i];
+    }
 
     Channel *ch = new Channel(name);
     Channels.push_back(ch);
     return ch;
+}
+void Server::delete_channel(const std::string& name)
+{
+    for (std::vector<Channel*>::iterator it = Channels.begin();
+         it != Channels.end();
+         ++it)
+    {
+        if ((*it)->getName() == name)
+        {
+            delete *it;          
+            Channels.erase(it); 
+            return;
+        }
+    }
 }
 
 Client *Server::getClient(int fd){
@@ -72,7 +86,39 @@ Client* Server::find_nicknameclient(const std::string &nick)
     }
     return NULL;
 }
+void Server::message_to_all_channel_commun(Client *cl, const std::string &msg)
+{
+    if (!cl)
+        return;
 
+    std::set<Client *> notified;
+
+    const std::set<Channel *> &channels = cl->c_channels;
+
+    for (std::set<Channel *>::const_iterator it = channels.begin();
+         it != channels.end();
+         ++it)
+    {
+        Channel *ch = *it;
+        if (!ch)
+            continue;
+
+        const std::vector<Client *> &members = ch->getUsers();
+
+        for (size_t j = 0; j < members.size(); j++)
+        {
+            Client *recipient = members[j];
+
+            if (!recipient || recipient == cl)
+                continue;
+
+            if (notified.insert(recipient).second)
+            {
+                sendData(recipient->getFd(), msg);
+            }
+        }
+    }
+}
 void signalHandler(int signum)
 {
     (void)signum;
@@ -185,7 +231,10 @@ void Server::addNewClient()
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
     clientPollFd.revents = 0;
-    Client *client = new Client(clientFd); //tat2kedo mnha 7it lmochkil fconstruct dakci 3elach zedtha
+    Client *client = new Client(
+    clientFd,
+    inet_ntoa(clientAddr.sin_addr));
+    client->ser = this;
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
     fds.push_back(clientPollFd);

@@ -5,11 +5,14 @@ Client::Client(int fd, char* hostnamee)
   nickname(""),
   username(""),
   hostname(hostnamee),
+  realname(""),
   client_hostname("127.0.0.1"),
   c_channels(),
+  read_buffer(""),
   Authenticated(false),
   c_password(false),
   c_user(false),
+  ser(NULL),
   c_nick(false)
 {}
 Client::~Client(){}
@@ -30,13 +33,26 @@ void Client::set_hostname(const std::string& host)
 
 void Client::check_register()
 {
-    if(!c_password && c_nick && c_user && !Authenticated)
+    if(c_password && c_nick && c_user && !Authenticated)
     {
         Authenticated = true;
+
         std::string servername = ser->get_hostname();
-        ser->sendData(getFd() ,":" + servername + " 001 " + nickname + " :Welcome to ft_irc server " + nickname + "@" + username + "\r\n");
-        ser->sendData(getFd(),":" + servername + " 002 " + nickname + " :Your host is " + servername + ", running version 1.0\r\n");
-        ser->sendData(getFd(), ":" + servername + " 003 " + nickname + " :This server was created " + std::string(__DATE__) + "\r\n");
+
+        ser->sendData(getFd(),
+        ":" + servername + " 001 " + nickname +
+        " :Welcome to ft_irc server " +
+        nickname + "@" + username + "\r\n");
+
+        ser->sendData(getFd(),
+        ":" + servername + " 002 " + nickname +
+        " :Your host is " + servername +
+        ", running version 1.0\r\n");
+
+        ser->sendData(getFd(),
+        ":" + servername + " 003 " + nickname +
+        " :This server was created " +
+        std::string(__DATE__) + "\r\n");
     }
 }
 
@@ -48,6 +64,10 @@ std::string Client::get_prefix() const
 bool Client::in_channel(Channel *chan) const
 {
     return c_channels.find(chan) != c_channels.end();
+}
+void Client::renoveChannel(Channel *chan)
+{
+    c_channels.erase(chan);
 }
 
 void Client::execute(const Commandeparse &cmd)
@@ -61,18 +81,20 @@ void Client::execute(const Commandeparse &cmd)
     }
     if(cmd.name == "JOIN")
         HandledJOIN(cmd);
-    // else if(cmd.name == "PASS")
-    //     handler.HandledPASS(cmd);
-    // else if(cmd.name == "USER")
-    //     handler.HandledUSER(cmd);
-    // else if(cmd.name == "KICK")
-    //     handler.HandledKICK(cmd);
-    // else if(cmd.name == "INVITE")
-    //      handler.HandledINVITE(cmd);
-    // else if(cmd.name == "TOPIC")
-    //     handler.HandledTOPIC(cmd);
-    // else if(cmd.name == "MODE")
-    //     handler.HandledMODE(cmd);
+    else if(cmd.name == "PASS")
+        HandledPASS(cmd);
+    else if(cmd.name == "USER")
+        HandledUSER(cmd);
+    else if(cmd.name == "NICK")
+        HandledNICK(cmd);
+    else if(cmd.name == "KICK")
+        HandledKICK(cmd);
+    else if(cmd.name == "INVITE")
+        HandledINVITE(cmd);
+    else if(cmd.name == "TOPIC")
+       HandledTOPIC(cmd);
+    else if(cmd.name == "MODE")
+       HandledMODE(cmd);
     if(cmd.name == "PRIVMSG")
         HandledPRIVMSG(cmd);
     else

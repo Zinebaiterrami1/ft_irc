@@ -19,17 +19,35 @@ Channel::Channel(const std::string &channelName)
 {
 }
 
-void Channel::sendMsgClient(const std::string &msg, Client *sender)
+
+void Channel::brodcast_Channel(const std::string &msg, Client *sender, Server *ser)
 {
     for (size_t i = 0; i < users.size(); i++)
     {
-        if (users[i] != sender)
+        Client *recipient = users[i];
+
+        if (recipient && recipient != sender)
         {
-            users[i]->create_reply(msg);
+            ser->sendData(recipient->getFd(), msg);
         }
     }
 }
 
+std::string Channel::getKey(){
+    return key;
+}
+
+bool Channel::hasKey(){
+    return !key.empty();
+}
+
+bool Channel::hasLimit(){
+    return userLimit != (size_t)-1;
+}
+
+size_t Channel::getLimit(){
+    return userLimit;
+}
 
 std::string Channel::getName() const
 {
@@ -66,6 +84,18 @@ void Channel::removeUser(Client *client)
         }
     }
 }
+
+void Channel::removeOperator(Client *client){
+    for (size_t i = 0; i < operators.size(); i++)
+    {
+        if (operators[i] == client)
+        {
+            operators.erase(operators.begin() + i);
+            return;
+        }
+    }
+}
+
 
 bool Channel::hasUser(Client *client) const
 {
@@ -114,7 +144,7 @@ void Channel::setKey(const std::string &k)
     key = k;
 }
 
-void Channel::setUserLimit(int limit)
+void Channel::setUserLimit(size_t limit)
 {
     userLimit = limit;
 }
@@ -125,7 +155,7 @@ bool Channel::isInviteOnly() const
     return inviteOnly;
 }
 
-int Channel::getUserLimit() const
+size_t Channel::getUserLimit() const
 {
     return userLimit;
 }
@@ -133,4 +163,9 @@ int Channel::getUserLimit() const
 const std::vector<Client *> &Channel::getUsers() const
 {
     return users;
+}
+
+void Channel::add_invite(const std::string& nickname)
+{
+    invited.insert(nickname);
 }

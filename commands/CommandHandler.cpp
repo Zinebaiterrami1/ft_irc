@@ -4,13 +4,14 @@
 #include "../includes/Server.hpp"
 #include "../includes/Commandeparse.hpp"
 
-void valideArgs(std::vector<std::string> args)
+static void valideArgs(std::vector<std::string> args)
 {
-    if(args[0][0] == '#' && args[0][1] && isalnum(args[0][1])){
-        for(size_t j = 0; args[0][j]; j++){
-            if(args[0][j] == ','){
-                if(args[0][j+1] && args[0][j+1] == '#'){
-                    if(args[0][j+2] && isalnum(args[0][j+2]))
+    std::cout << "-------> " << args[1] << "\n";
+    if(args.size() > 1 && args[1][0] == '#' && args[1][1] && isalnum(args[1][1])){
+        for(size_t j = 0; args[1][j]; j++){
+            if(args[1][j] == ','){
+                if(args[1][j+1] && args[1][j+1] == '#'){
+                    if(args[1][j+2] && isalnum(args[1][j+2]))
                         continue;
                     else throw "invalide channel name (empty or not alphaNum)";
                 }         
@@ -21,29 +22,36 @@ void valideArgs(std::vector<std::string> args)
     else throw "Channels need '#' at start";
 }
 
-void leaveAll(std::vector<Channel*> channels,Client *client){//remove user from serv.channels
-    for(size_t i = 0; i < channels.size(); i++){
-        if(channels[i]->hasUser(client))
-            channels[i]->removeUser(client);
+void leaveAll(std::vector<Channel*> ch,Client *client)
+{//remove user from serv.ch
+    for(size_t i = 0; i < ch.size(); i++)
+    {
+        if(ch[i]->hasUser(client))
+            ch[i]->removeUser(client);
     }
 }
 
-std::vector<std::string> split_Channels(std::string channels){//#ch1,#ch2,
-    std::vector<std::string> Splited_channels;
-    for(size_t i = 0; i < channels.size(); i++){
-        if(channels[i] == '#'){
+std::vector<std::string> split_Channels(std::string chnl){//#ch1,#ch2,
+    std::vector<std::string> Splited_chnl;
+    for(size_t i = 0; i < chnl.size(); i++)
+    {
+        if(chnl[i] == '#')
+        {
             i++;
-            size_t next = channels.find('#', i);
-            std::string name = channels.substr(i, next-1);
-            Splited_channels.push_back(name);
+            size_t next = chnl.find('#', i);
+            if(next == std::string::npos)
+                break;
+            std::string name = chnl.substr(i, next-1 - i);// -2 to not take ','                 #abc,#ch
+            Splited_chnl.push_back(name);
         }
     }
-    return Splited_channels;
+    return Splited_chnl;
 }
 
 std::vector<std::string> split_Keys(std::vector<std::string> keys){//key1 key2
     std::vector<std::string> Splited_keys;
-    for(size_t i = 1; i < keys.size(); i++){
+    for(size_t i = 2; i < keys.size(); i++)
+    {
         Splited_keys.push_back(keys[i]);
     }
     return Splited_keys;
@@ -61,140 +69,70 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
     // void(keys);
     for(size_t i = 0; i < channels.size(); i++){
         if(!ser->get_channel(channels[i])){
-            Channel *newChannel;
-            newChannel = ser->create_channel(channels[i]);
-            newChannel->addOperator(client);
-            newChannel->addUser(client);
+            Channel *newChnl;
+            newChnl = ser->create_channel(channels[i]);
+            newChnl->addOperator(client);
+            newChnl->addUser(client);
         }
-        else
-            ser->get_channel(channels[i])->addUser(client);
+        else{
+            Channel *chl = ser->get_channel(channels[i]);
+            if(chl->hasLimit() && chl->getLimit() <= chl->getUsers().size())
+            {
+                ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 475 " + client->get_nickname() 
+                + " can not JOIN " + chl->getName() + " Limits reached\r\n");
+                continue;
+            }
+            if((chl->hasKey() && i >= keys.size() )|| (chl->hasKey() && keys[i] != chl->getKey()))
+            {
+                ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 471 " + client->get_nickname() 
+                + " can not JOIN " + chl->getName() + " Incorrect KEY\r\n");
+                continue;
+            }
+            if(client->in_channel(chl))
+            {
+                ser->sendData(client->getFd(), ":" + ser->get_hostname() + client->get_nickname() 
+                + " is already in channel : " + chl->getName() + "\r\n");
+                continue;
+            }
+            else
+            {
+                chl->addUser(client);
+                chl->brodcast_Channel(client->get_nickname() + " Joined the channel\n", client, ser);
+            }
+        }
+            // ser->get_channel(channels[i])->addUser(client);
     }
 }
 
 void Client::HandledJOIN(const Commandeparse &cmd)
 {
+    //CHACK IF INVITE ONLY 
     try{
 
-        if(!Authenticated)
+        if(!Authenticated){
             throw;
+        }
         if(cmd.args.empty()){
-            // creat_reply(":" + ser->get_hostname() + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
+            ser->sendData(getFd(), ":" + ser->get_hostname() + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
             throw "emty arguments";
         }
 
         valideArgs(cmd.args);//if no # //existe 
 
-        if(cmd.args.size() == 1 && cmd.args[0] == "0")
+        if(cmd.args.size() == 2 && cmd.args[1] == "0")
         {
-            // if(cmd.args[0] != "0")
-            //     joinChannel(cmd.args[0], username, ser);//if first client creat channel
-            // else 
             leaveAll(ser->get_all_channels(), this);
         }
+
         else 
         {//MODE #secret +k hello42   //key == MODE #secret +k hello42
-            std::vector<std::string> channels = split_Channels(cmd.args[0]);
+            std::vector<std::string> channels = split_Channels(cmd.args[1]);
             std::vector<std::string> keys = split_Keys(cmd.args);
             join_Multi_Channls(channels, keys, this,  ser);//if first client creat channel
         }
     }
-    catch(std::string error){
+    catch(const char *error){
+        std::cerr << error << "\n";
         return;
     }
 }
-
-// void CommandHandler::HandledKICK(const Commandeparse &cmd)
-// void Client::HandledJOIN(const Commandeparse &cmd)
-// {
-//     try{
-
-//         if(!Authenticated)
-//             throw;
-//         if(cmd.args.empty()){
-//             creat_raply(":" + ser->get_hostname + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
-//             throw;
-//         }
-//         if(!valideArgs(cmd.args))//if no # //existe 
-//         {
-//             throw;
-//         }
-//         if(cmd.args.size() == 1 )
-//         {
-//             if(cmd.args[0] != "0")
-//                 joinChannel(cmd.args[0], username, ser);//if first client creat channel
-//             else 
-//                 leaveAll(cmd.args[0], username, ser);
-//         }
-//         else 
-//         {//MODE #secret +k hello42   //key == MODE #secret +k hello42
-//             std::string *channels = split_Channels(cmd.args);
-//             std::string *keys = split_Keys(cmd.args);
-//             joinMultiChannl(channels, keys, username, ser);
-//         }
-//     }
-//     catch(...){
-//         return;
-//     }
-// }
-
-// // void CommandHandler::HandledKICK(const Commandeparse &cmd)
-// // {
-    
-// // }
-
-// // void CommandHandler::HandledINVITE(const Commandeparse &cmd)
-// // {
-    
-// // }
-
-// // void CommandHandler::HandledTOPIC(const Commandeparse &cmd)
-// // {
-    
-// // }
-
-// // void CommandHandler::HandledMODE(const Commandeparse &cmd)
-// // {
-    
-// // }
-
-// // void CommandHandler::HandledPASS(const Commandeparse &cmd)
-// // {
-// //     // if(client.registerd)
-// //     // {
-// //     //     std::cout
-// //     // }er(*NULL)
-// //     config con;
-// //     if(cmd.args.empty())
-// //     {
-// //         std::cout << "PASS: no password given\n";
-// //         return ;
-// //     }
-// //     if(cmd.args.size() > 1)
-// //     {
-// //         std::cout << "error number args is > 1" << std::endl;
-// //         return ;
-// //     }
-// //     std::string pass = cmd.args[0];
-// //     if(pass != con.password)
-// //     {
-// //         std::cout << "password incorrect " << std::endl;
-// //     }
-// //     else
-// //     {
-// //         std::cout << "password correct" << std::endl;
-// //     }
-// // }
-// // void CommandHandler::HandledPART(const Commandeparse &cmd)
-// // {
-
-    
-// // }
-
-// // void CommandHandler::HandledUSER(const Commandeparse &cmd)
-// // {
-// //     //check wach deja m regestered b password 
-// //     // check wach authentificate 
-
-
-// // }
-

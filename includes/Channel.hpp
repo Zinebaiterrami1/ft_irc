@@ -50,13 +50,10 @@ public:
 
     bool isInviteOnly() const;
     bool istopicRestricted() const {return topicRestricted;}
-    int getUserLimit() const;
+    size_t getUserLimit() const;
     void add_invite(const std::string& nickname);
     const std::vector<Client *> &getUsers() const;
     std::string get_mode() const;
-    void sendMsgClient(const std::string &msg, Client *sender, Server *ser);
-    void setUserLimit(int limit);
 
     void brodcast_Channel(const std::string &msg, Client *sender, Server *ser);
 };
-

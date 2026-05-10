@@ -20,7 +20,7 @@ Channel::Channel(const std::string &channelName)
 }
 
 
-void Channel::sendMsgClient(const std::string &msg, Client *sender, Server *ser)
+void Channel::brodcast_Channel(const std::string &msg, Client *sender, Server *ser)
 {
     for (size_t i = 0; i < users.size(); i++)
     {
@@ -33,6 +33,21 @@ void Channel::sendMsgClient(const std::string &msg, Client *sender, Server *ser)
     }
 }
 
+std::string Channel::getKey(){
+    return key;
+}
+
+bool Channel::hasKey(){
+    return !key.empty();
+}
+
+bool Channel::hasLimit(){
+    return userLimit != (size_t)-1;
+}
+
+size_t Channel::getLimit(){
+    return userLimit;
+}
 
 std::string Channel::getName() const
 {
@@ -42,34 +57,6 @@ std::string Channel::getName() const
 std::string Channel::getTopic() const
 {
     return topic;
-}
-
-
-void Channel::addUser(Client *client)
-{
-    users.push_back(client);
-}
-
-void Channel::removeUser(Client *client)
-{
-    for (size_t i = 0; i < users.size(); i++)
-    {
-        if (users[i] == client)
-        {
-            users.erase(users.begin() + i);
-            return;
-        }
-    }
-}
-
-bool Channel::hasUser(Client *client) const
-{
-    for (size_t i = 0; i < users.size(); i++)
-    {
-        if (users[i] == client)
-            return true;
-    }
-    return false;
 }
 
 std::string Channel::get_mode() const
@@ -103,6 +90,54 @@ std::string Channel::get_mode() const
 
     return modes + param;
 }
+void Channel::addUser(Client *client)
+{
+    users.push_back(client);
+}
+
+void Channel::removeUser(Client *client)
+{
+    for (size_t i = 0; i < users.size(); i++)
+    {
+        if (users[i] == client)
+        {
+            users.erase(users.begin() + i);
+            return;
+        }
+    }
+    for (size_t i = 0; i < operators.size(); i++)
+    {
+        if (operators[i] == client)
+        {
+            operators.erase(operators.begin() + i);
+            return;
+        }
+    }
+}
+
+void Channel::removeOperator(Client *client){
+    for (size_t i = 0; i < operators.size(); i++)
+    {
+        if (operators[i] == client)
+        {
+            operators.erase(operators.begin() + i);
+            return;
+        }
+    }
+}
+
+
+bool Channel::hasUser(Client *client) const
+{
+    for (size_t i = 0; i < users.size(); i++)
+    {
+        if (users[i] == client)
+            return true;
+    }
+    return false;
+}
+
+
 void Channel::addOperator(Client *client)
 {
     operators.push_back(client);
@@ -139,7 +174,7 @@ void Channel::setKey(const std::string &k)
     key = k;
 }
 
-void Channel::setUserLimit(int limit)
+void Channel::setUserLimit(size_t limit)
 {
     userLimit = limit;
 }
@@ -150,7 +185,7 @@ bool Channel::isInviteOnly() const
     return inviteOnly;
 }
 
-int Channel::getUserLimit() const
+size_t Channel::getUserLimit() const
 {
     return userLimit;
 }

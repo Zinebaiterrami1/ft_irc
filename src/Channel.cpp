@@ -59,7 +59,37 @@ std::string Channel::getTopic() const
     return topic;
 }
 
+std::string Channel::get_mode() const
+{
+    std::string modes = "+";
+    std::string param;
 
+    if (inviteOnly)
+        modes += 'i';
+
+    if (topicRestricted)
+        modes += 't';
+
+    if (!key.empty())
+    {
+        modes += 'k';
+        param += " " + key;
+    }
+
+    if (userLimit > 0)
+    {
+        std::stringstream value;
+        value << userLimit;
+
+        modes += 'l';
+        param += " " + value.str();
+    }
+
+    if (modes == "+")
+        return "";
+
+    return modes + param;
+}
 void Channel::addUser(Client *client)
 {
     users.push_back(client);

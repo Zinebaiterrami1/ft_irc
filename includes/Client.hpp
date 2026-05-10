@@ -50,8 +50,7 @@ class Client{
         void HandledPASS(const Commandeparse &cmd);
         void HandledUSER(const Commandeparse &cmd);
         void HandledNICK(const Commandeparse &cmd);
-        void HandledPART(const Commandeparse &cmd);
-        
+        void HandledPART(const Commandeparse &cmd);        
 };
 
 

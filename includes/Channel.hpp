@@ -53,6 +53,7 @@ public:
     size_t getUserLimit() const;
     void add_invite(const std::string& nickname);
     const std::vector<Client *> &getUsers() const;
+    std::string get_mode() const;
 
     void brodcast_Channel(const std::string &msg, Client *sender, Server *ser);
 };

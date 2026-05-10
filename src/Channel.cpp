@@ -1,171 +1,127 @@
-#include "../includes/Channel.hpp"
-#include <iostream>
+#include "../includes/CommandHandler.hpp"
+#include <cctype>
+#include "../includes/config.hpp"
+#include "../includes/Commandeparse.hpp"
+#include "../includes/Client.hpp"
+#include "../includes/Server.hpp"
 
-
-Channel::Channel()
-    : name(""), topic(""),
-      inviteOnly(false),
-      topicRestricted(false),
-      userLimit(-1)
+void Client::HandledMODE(const Commandeparse &cmd)
 {
-}
 
-Channel::Channel(const std::string &channelName)
-    : name(channelName),
-      topic(""),
-      inviteOnly(false),
-      topicRestricted(false),
-      userLimit(-1)
-{
-}
+        std::string servername = ser->get_hostname();
 
+        if (!Authenticated)
+            return;
 
-void Channel::brodcast_Channel(const std::string &msg, Client *sender, Server *ser)
-{
-    for (size_t i = 0; i < users.size(); i++)
-    {
-        Client *recipient = users[i];
-
-        if (recipient && recipient != sender)
+        if (cmd.args.empty())
         {
-            ser->sendData(recipient->getFd(), msg);
-        }
-    }
-}
-
-std::string Channel::getKey(){
-    return key;
-}
-
-bool Channel::hasKey(){
-    return !key.empty();
-}
-
-bool Channel::hasLimit(){
-    return userLimit != (size_t)-1;
-}
-
-size_t Channel::getLimit(){
-    return userLimit;
-}
-
-std::string Channel::getName() const
-{
-    return name;
-}
-
-std::string Channel::getTopic() const
-{
-    return topic;
-}
-
-
-void Channel::addUser(Client *client)
-{
-    users.push_back(client);
-}
-
-void Channel::removeUser(Client *client)
-{
-    for (size_t i = 0; i < users.size(); i++)
-    {
-        if (users[i] == client)
-        {
-            users.erase(users.begin() + i);
+            ser->sendData(getFd(),
+                ":" + servername + " 461 " + nickname + " MODE :Not enough parameters\r\n");
             return;
         }
-    }
-    for (size_t i = 0; i < operators.size(); i++)
-    {
-        if (operators[i] == client)
+
+        std::string ch_name = cmd.args[0];
+        Channel *chl = ser->get_channel(ch_name);
+
+        if (!chl)
         {
-            operators.erase(operators.begin() + i);
+            ser->sendData(getFd(),
+                ":" + servername + " 403 " + nickname + " " + ch_name + " :No such channel\r\n");
             return;
         }
-    }
-}
 
-void Channel::removeOperator(Client *client){
-    for (size_t i = 0; i < operators.size(); i++)
-    {
-        if (operators[i] == client)
+        if (cmd.args.size() == 1)
         {
-            operators.erase(operators.begin() + i);
+            ser->sendData(getFd(),
+                ":" + servername + " 324 " + nickname + " " + ch_name + " " + chl->get_mode() + "\r\n");
             return;
         }
-    }
-}
 
+        if (!in_channel(chl))
+        {
+            ser->sendData(getFd(),
+                ":" + servername + " 442 " + nickname + " " + ch_name + " :You're not on that channel\r\n");
+            return;
+        }
 
-bool Channel::hasUser(Client *client) const
-{
-    for (size_t i = 0; i < users.size(); i++)
-    {
-        if (users[i] == client)
-            return true;
-    }
-    return false;
-}
+        if (!chl->isOperator(this))
+        {
+            ser->sendData(getFd(),
+                ":" + servername + " 482 " + nickname + " " + ch_name + " :You're not channel operator\r\n");
+            return;
+        }
 
+        const std::string &modes = cmd.args[1];
+        std::vector<std::string> param(cmd.args.begin() + 2, cmd.args.end());
 
-void Channel::addOperator(Client *client)
-{
-    operators.push_back(client);
-}
+        char sign = 0;
+        size_t idx = 0;
 
-bool Channel::isOperator(Client *client) const
-{
-    for (size_t i = 0; i < operators.size(); i++)
-    {
-        if (operators[i] == client)
-            return true;
-    }
-    return false;
-}
+        std::string applied_modes;
+        std::string applied_params;
 
+        for (size_t i = 0; i < modes.size(); i++)
+        {
+            char m = modes[i];
 
-void Channel::setTopic(const std::string &newTopic)
-{
-    topic = newTopic;
-}
+            if (m == '+' || m == '-')
+            {
+                sign = m;
+                continue;
+            }
 
-void Channel::setInviteOnly(bool mode)
-{
-    inviteOnly = mode;
-}
+            if (!sign)
+                continue;
 
-void Channel::setTopicRestricted(bool mode)
-{
-    topicRestricted = mode;
-}
+            if (m == 'i')
+                chl->setInviteOnly(sign == '+');
+            else if (m == 't')
+                chl->setTopicRestricted(sign == '+');
+            else if (m == 'k')
+            {
+                if (sign == '+' && idx < param.size())
+                    chl->setKey(param[idx++]);
+                else if (sign == '-')
+                    chl->setKey("");
+            }
+            else if (m == 'l')
+            {
+                if (sign == '+' && idx < param.size())
+                    chl->set_user_limit(std::atoi(param[idx++].c_str()));
+                else if (sign == '-')
+                    chl->set_user_limit(0);
+            }
+            else if (m == 'o')
+            {
+                if (idx < param.size())
+                {
+                    Client *cl = ser->find_nicknameclient(param[idx]);
+                    if (cl && cl->in_channel(chl))
+                    {
+                        if (sign == '+')
+                            chl->addOperator(cl);
+                        else
+                            chl->removeOperator(cl);
+                        applied_params += " " + param[idx];
+                    }
+                    idx++;
+                }
+            }
+            else
+            {
+                ser->sendData(getFd(),
+                    ":" + servername + " 472 " + nickname + " " + m + " :Unknown mode\r\n");
+                continue;
+            }
 
-void Channel::setKey(const std::string &k)
-{
-    key = k;
-}
+            applied_modes += sign;
+            applied_modes += m;
+        }
 
-void Channel::setUserLimit(size_t limit)
-{
-    userLimit = limit;
-}
-
-
-bool Channel::isInviteOnly() const
-{
-    return inviteOnly;
-}
-
-size_t Channel::getUserLimit() const
-{
-    return userLimit;
-}
-
-const std::vector<Client *> &Channel::getUsers() const
-{
-    return users;
-}
-
-void Channel::add_invite(const std::string& nickname)
-{
-    invited.insert(nickname);
+        if (!applied_modes.empty())
+        {
+            std::string msg = ":" + nickname + " MODE " + ch_name + " " +
+                              applied_modes + applied_params + "\r\n";
+            chl->broadcast_Channel(msg, this, ser);
+        }
 }

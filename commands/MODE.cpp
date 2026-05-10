@@ -1,15 +1,14 @@
 #include "../includes/CommandHandler.hpp"
 #include <cstdlib>
-#include<unistd.h>
 #include "../includes/config.hpp"
 #include "../includes/Commandeparse.hpp"
 #include "../includes/Client.hpp"
 #include "../includes/Server.hpp"
 #include "../includes/Channel.hpp"
+
 void Client::HandledMODE(const Commandeparse &cmd)
 {
-    try
-    {
+
         std::string servername = ser->get_hostname();
 
         if (!Authenticated)
@@ -126,8 +125,4 @@ void Client::HandledMODE(const Commandeparse &cmd)
                               applied_modes + applied_params + "\r\n";
             chl->brodcast_Channel(msg, this, ser);
         }
-    }
-    catch (...)
-    {
-    }
 }

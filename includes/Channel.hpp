@@ -56,7 +56,7 @@ public:
     std::string get_mode() const;
     void sendMsgClient(const std::string &msg, Client *sender, Server *ser);
     void setUserLimit(int limit);
-    // int getUserLimit() const;
+
     void brodcast_Channel(const std::string &msg, Client *sender, Server *ser);
 };
 

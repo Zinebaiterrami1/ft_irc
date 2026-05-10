@@ -107,7 +107,37 @@ bool Channel::hasUser(Client *client) const
     return false;
 }
 
+std::string Channel::get_mode() const
+{
+    std::string modes = "+";
+    std::string param;
 
+    if (inviteOnly)
+        modes += 'i';
+
+    if (topicRestricted)
+        modes += 't';
+
+    if (!key.empty())
+    {
+        modes += 'k';
+        param += " " + key;
+    }
+
+    if (userLimit > 0)
+    {
+        std::stringstream value;
+        value << userLimit;
+
+        modes += 'l';
+        param += " " + value.str();
+    }
+
+    if (modes == "+")
+        return "";
+
+    return modes + param;
+}
 void Channel::addOperator(Client *client)
 {
     operators.push_back(client);

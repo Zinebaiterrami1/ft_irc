@@ -80,7 +80,11 @@ void Client::execute(const Commandeparse &cmd)
         c += std::toupper(cmd.name[i]);
     }
     if(cmd.name == "JOIN")
+    {
+        std::cout << "------------------>" << std::endl;
         HandledJOIN(cmd);
+
+    }
     else if(cmd.name == "PASS")
         HandledPASS(cmd);
     else if(cmd.name == "USER")

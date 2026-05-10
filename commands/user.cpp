@@ -19,11 +19,17 @@ void Client::HandledUSER(const Commandeparse &cmd)
         ser->sendData(getFd(), ":" + servername + " 462 " + nickname + " :You may not reregister\r\n");
         return ;
     }
+        if(cmd.args.empty()) // NBDEL MSG
+    {
+        ser->sendData(getFd(),":" + servername + " 461 * USER :Not enough parameters\r\n");
+        return ;
+    }
     if(cmd.args[0].find('@') != std::string::npos)
     {
         ser->sendData(getFd(),":" + servername + " 461 " + nickname + " :Invalid username\r\n");
         return ;
     }
+
     if(cmd.args.size() < 4)
     {
         ser->sendData(getFd(),":" + servername + " 461 * USER :Not enough parameters\r\n");

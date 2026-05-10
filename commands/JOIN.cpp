@@ -55,10 +55,10 @@ std::vector<std::string> split_Channels(std::string chnl){//#ch1,#ch2,
     // char *str;
     // std::stringstream ss(chnl);
     // std::getline(ss, str, ',');
-    // Splited_chnl.push_back(str + 1);
+    // Splited_chnl.push_back(str);
     // while (std::getline(ss, str, ','))
     // {
-    //     Splited_chnl.push_back(str+1);
+    //     Splited_chnl.push_back(str);
     // }
     
     for(size_t i = 0; i < chnl.size(); i++)
@@ -69,7 +69,7 @@ std::vector<std::string> split_Channels(std::string chnl){//#ch1,#ch2,
             size_t next = chnl.find('#', i);
             if(next == std::string::npos)
                 next = chnl.length() + 1;
-            std::string name = chnl.substr(i, next-1 - i);// -1 to not take ','                 #abc,#ch
+            std::string name = chnl.substr(i, next - i);// -1 to not take ','                 #abc,#ch
             Splited_chnl.push_back(name);
         }
     }

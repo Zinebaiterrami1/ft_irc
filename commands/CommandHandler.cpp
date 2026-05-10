@@ -52,20 +52,27 @@ void leaveAll(std::vector<Channel*> ch,Client *client)
 
 std::vector<std::string> split_Channels(std::string chnl){//#ch1,#ch2,
     std::vector<std::string> Splited_chnl;
-    std::string str;
-    std::getline(chnl, str, '')
-    // for(size_t i = 0; i < chnl.size(); i++)
+    // char *str;
+    // std::stringstream ss(chnl);
+    // std::getline(ss, str, ',');
+    // Splited_chnl.push_back(str + 1);
+    // while (std::getline(ss, str, ','))
     // {
-    //     if(chnl[i] == '#')
-    //     {
-    //         i++;
-    //         size_t next = chnl.find('#', i);
-    //         if(next == std::string::npos)
-    //             next = chnl.length() + 1;
-    //         std::string name = chnl.substr(i, next-1 - i);// -2 to not take ','                 #abc,#ch
-    //         Splited_chnl.push_back(name);
-    //     }
+    //     Splited_chnl.push_back(str+1);
     // }
+    
+    for(size_t i = 0; i < chnl.size(); i++)
+    {
+        if(chnl[i] == '#')
+        {
+            i++;
+            size_t next = chnl.find('#', i);
+            if(next == std::string::npos)
+                next = chnl.length() + 1;
+            std::string name = chnl.substr(i, next-1 - i);// -1 to not take ','                 #abc,#ch
+            Splited_chnl.push_back(name);
+        }
+    }
     return Splited_chnl;
 }
 
@@ -88,13 +95,13 @@ std::vector<std::string> split_Keys(std::vector<std::string> keys){//key1 key2
 // }
 
 void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::string> keys, Client *client, Server *ser){
-    // void(keys);
     for(size_t i = 0; i < channels.size(); i++){
         if(!ser->get_channel(channels[i])){
             Channel *newChnl;
             newChnl = ser->create_channel(channels[i]);
             newChnl->addOperator(client);
             newChnl->addUser(client);
+            std::cout << MAG << client->get_nickname() <<" " << channels[i] << " CHANNEL CREATED " << RESET << "\n";
         }
         else{
             Channel *chl = ser->get_channel(channels[i]);
@@ -120,6 +127,7 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
             {
                 chl->addUser(client);
                 chl->brodcast_Channel(client->get_nickname() + " Joined the channel\n", client, ser);
+                std::cout << RED << "CLIENT " << client->get_nickname() << " ADDED\n";
             }
         }
             // ser->get_channel(channels[i])->addUser(client);
@@ -141,7 +149,7 @@ void Client::HandledJOIN(const Commandeparse &cmd)
 
         valideArgs(cmd.args);//if no # //existe 
 
-        if(cmd.args.size() == 2 && cmd.args[0] == "0")
+        if(cmd.args.size() == 1 && cmd.args[0] == "0")
         {
             leaveAll(ser->get_all_channels(), this);
         }

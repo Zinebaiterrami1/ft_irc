@@ -21,7 +21,8 @@
 # include <csignal>
 #include <cstdio>
 # include <sstream>
-#include <map>
+#include <string>
+#include <sstream>
 
 #define RED "\e[1;31m"
 #define WHI "\e[0;37m"

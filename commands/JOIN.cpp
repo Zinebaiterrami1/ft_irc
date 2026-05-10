@@ -3,7 +3,7 @@
 #include "../includes/config.hpp"
 #include "../includes/Server.hpp"
 #include "../includes/Commandeparse.hpp"
-
+#include "../includes/Channel.hpp"
 static void valideArgs(std::vector<std::string> args)
 {
     std::cout << "-------> " << args[0] << "\n";

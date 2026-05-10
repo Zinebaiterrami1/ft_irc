@@ -97,7 +97,7 @@ void Client::execute(const Commandeparse &cmd)
        HandledMODE(cmd);
     else if(cmd.name == "PRIVMSG")
         HandledPRIVMSG(cmd);
-    else if(cmd.name ="PART")
+    else if(cmd.name == "PART")
         HandledPART(cmd);
     else
         std::cerr << "Unknown Command " << std::endl;

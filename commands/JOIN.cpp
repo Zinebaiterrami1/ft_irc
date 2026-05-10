@@ -101,6 +101,7 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
             newChnl = ser->create_channel(channels[i]);
             newChnl->addOperator(client);
             newChnl->addUser(client);
+            client->c_channels.insert(newChnl);
             std::cout << MAG << client->get_nickname() <<" " << channels[i] << " CHANNEL CREATED " << RESET << "\n";
         }
         else{

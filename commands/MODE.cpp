@@ -121,8 +121,8 @@ void Client::HandledMODE(const Commandeparse &cmd)
 
         if (!applied_modes.empty())
         {
-            std::string msg = ":" + nickname + " MODE " + ch_name + " " +
+            std::string msg = ":" + get_prefix() + " MODE " + ch_name + " " +
                               applied_modes + applied_params + "\r\n";
-            chl->brodcast_Channel(msg, this, ser);
+            chl->brodcast_Channel(msg, ser);
         }
 }

@@ -20,16 +20,14 @@ Channel::Channel(const std::string &channelName)
 }
 
 
-void Channel::brodcast_Channel(const std::string &msg, Client *sender, Server *ser)
+void Channel::brodcast_Channel(const std::string &msg,  Server *ser)
 {
     for (size_t i = 0; i < users.size(); i++)
     {
         Client *recipient = users[i];
 
-        if (recipient && recipient != sender)
-        {
+        if (recipient)
             ser->sendData(recipient->getFd(), msg);
-        }
     }
 }
 
@@ -42,7 +40,7 @@ bool Channel::hasKey(){
 }
 
 bool Channel::hasLimit(){
-    return userLimit != (size_t)-1;
+    return userLimit != -1;
 }
 
 size_t Channel::getLimit(){
@@ -126,6 +124,10 @@ void Channel::removeOperator(Client *client){
     }
 }
 
+void Channel::removeInvite(Client *client)
+{
+    invited.erase(client->get_nickname());
+}
 
 bool Channel::hasUser(Client *client) const
 {
@@ -138,7 +140,7 @@ bool Channel::hasUser(Client *client) const
 }
 
 
-void Channel::addOperator(Client *client) const
+void Channel::addOperator(Client *client) 
 {
     operators.push_back(client);
 }
@@ -155,7 +157,7 @@ bool Channel::isOperator(Client *client) const
 
 bool Channel::isInvited(Client *client) const
 {
-    return invited_clients.find(client->get_nickname()) != std::npos;
+    return invited.find(client->get_nickname()) != invited.end();
 }
 
 void Channel::setTopic(const std::string &newTopic)

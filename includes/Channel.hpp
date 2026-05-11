@@ -15,10 +15,10 @@ private:
 
     std::vector<Client *> users;
     std::vector<Client *> operators;
-    std::set<std::string> invited_clients;
+    std::set<std::string> invited;
     bool inviteOnly;
     bool topicRestricted;
-    size_t userLimit;
+    int userLimit;
 
 public:
     Channel();
@@ -29,12 +29,13 @@ public:
 
     void addUser(Client *client);
     void removeUser(Client *client);
+    void removeInvite(Client *client);
     void removeOperator(Client *client);
     bool hasUser(Client *client) const;
     bool hasKey();
     bool hasLimit();
 
-    void addOperator(Client *client) const;
+    void addOperator(Client *client);
     bool isOperator(Client *client) const;
     bool isInvited(Client *client) const;
     void setTopic(const std::string &newTopic);
@@ -55,5 +56,5 @@ public:
     const std::vector<Client *> &getUsers() const;
     std::string get_mode() const;
 
-    void brodcast_Channel(const std::string &msg, Client *sender, Server *ser);
+    void brodcast_Channel(const std::string &msg,  Server *ser);
 };

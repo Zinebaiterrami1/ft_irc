@@ -39,7 +39,6 @@ class Client{
         const std::string &get_nickname() const;
         void check_register();
         void renoveChannel(Channel *chan);
-        // bool isInvited(Channel *channel);
         void delete_channel(const std::string& name);
         void HandledJOIN(const Commandeparse &cmd);
         void HandledKICK(const Commandeparse &cmd);
@@ -53,8 +52,4 @@ class Client{
         void HandledPART(const Commandeparse &cmd);        
 };
 
-
-bool Client::isInvited(Channel *channel){
-    if()
-}
 

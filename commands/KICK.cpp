@@ -65,7 +65,7 @@ void Client::HandledKICK(const Commandeparse &cmd)
 
     std::string msg_predix = ":" + get_prefix() + " KICK " + target + " " + nick + " :" + reason + "\r\n";
     
-    chan->brodcast_Channel(msg_predix, this, ser);
+    chan->brodcast_Channel(msg_predix,  ser);
 
     chan->removeUser(cl_nick);
     cl_nick->renoveChannel(chan);

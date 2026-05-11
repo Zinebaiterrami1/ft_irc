@@ -184,11 +184,11 @@ void Client::HandledJOIN(const Commandeparse &cmd)
     try{
 
         if(!Authenticated){
-            throw;
+            return;
         }
         if(cmd.args.empty()){
             ser->sendData(getFd(), ":" + ser->get_hostname() + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
-            throw "emty arguments";
+            return;
         }
 
         valideArgs(cmd.args);//if no # //existe 

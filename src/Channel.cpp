@@ -20,16 +20,14 @@ Channel::Channel(const std::string &channelName)
 }
 
 
-void Channel::brodcast_Channel(const std::string &msg, Client *sender, Server *ser)
+void Channel::brodcast_Channel(const std::string &msg,  Server *ser)
 {
     for (size_t i = 0; i < users.size(); i++)
     {
         Client *recipient = users[i];
 
-        if (recipient && recipient != sender)
-        {
+        if (recipient)
             ser->sendData(recipient->getFd(), msg);
-        }
     }
 }
 

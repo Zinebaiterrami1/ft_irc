@@ -31,6 +31,8 @@ bool is_special(unsigned char c)
 
 void Client::HandledNICK(const Commandeparse &cmd)
 {
+    // std::cout << cmd.name << "\n";
+
     std::string servername = ser->get_hostname();
 
     if (!c_password)

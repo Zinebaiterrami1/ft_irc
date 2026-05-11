@@ -72,37 +72,36 @@ void Client::renoveChannel(Channel *chan)
 
 void Client::execute(const Commandeparse &cmd)
 {
+    std::string name = cmd.name;
 
-    std::string c;
+    for (size_t i = 0; i < name.size(); i++)
+        name[i] = std::toupper(name[i]);
 
-    for (size_t i = 0; i <cmd.name.size() ; i++)
-    {
-        c += std::toupper(cmd.name[i]);
-    }
-    if(cmd.name == "JOIN")
-    {
-        std::cout << "------------------>" << std::endl;
+    if (name == "CAP" || name == "PING" || name == "PONG" || name == "WHO" || name == "QUIT")
+        return;
+
+    std::cout << name << std::endl;
+
+    if (name == "JOIN")
         HandledJOIN(cmd);
-
-    }
-    else if(cmd.name == "PASS")
+    else if (name == "PASS")
         HandledPASS(cmd);
-    else if(cmd.name == "USER")
+    else if (name == "USER")
         HandledUSER(cmd);
-    else if(cmd.name == "NICK")
+    else if (name == "NICK")
         HandledNICK(cmd);
-    else if(cmd.name == "KICK")
+    else if (name == "KICK")
         HandledKICK(cmd);
-    else if(cmd.name == "INVITE")
+    else if (name == "INVITE")
         HandledINVITE(cmd);
-    else if(cmd.name == "TOPIC")
-       HandledTOPIC(cmd);
-    else if(cmd.name == "MODE")
-       HandledMODE(cmd);
-    else if(cmd.name == "PRIVMSG")
+    else if (name == "TOPIC")
+        HandledTOPIC(cmd);
+    else if (name == "MODE")
+        HandledMODE(cmd);
+    else if (name == "PRIVMSG")
         HandledPRIVMSG(cmd);
-    else if(cmd.name == "PART")
+    else if (name == "PART")
         HandledPART(cmd);
     else
-        std::cerr << "Unknown Command " << std::endl;
+        std::cerr << "Unknown Command" << std::endl;
 }

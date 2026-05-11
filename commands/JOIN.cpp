@@ -127,7 +127,7 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
             else
             {
                 chl->addUser(client);
-                chl->brodcast_Channel(client->get_nickname() + " Joined the channel\n", client, ser);
+                chl->brodcast_Channel(client->get_nickname() + " Joined the channel\n", ser);
                 std::cout << RED << "CLIENT " << client->get_nickname() << " ADDED\n";
             }
         }

@@ -7,6 +7,7 @@
 
 void Client::HandledUSER(const Commandeparse &cmd)
 {
+    // std::cout << cmd.name << "\n";
     std::string servername = ser->get_hostname();
     if(!c_password)
     {
@@ -19,14 +20,9 @@ void Client::HandledUSER(const Commandeparse &cmd)
         ser->sendData(getFd(), ":" + servername + " 462 " + nickname + " :You may not reregister\r\n");
         return ;
     }
-        if(cmd.args.empty()) // NBDEL MSG
+    if(cmd.args.empty()) // NBDEL MSG
     {
         ser->sendData(getFd(),":" + servername + " 461 * USER :Not enough parameters\r\n");
-        return ;
-    }
-    if(cmd.args[0].find('@') != std::string::npos)
-    {
-        ser->sendData(getFd(),":" + servername + " 461 " + nickname + " :Invalid username\r\n");
         return ;
     }
 
@@ -36,6 +32,11 @@ void Client::HandledUSER(const Commandeparse &cmd)
         return ;
     }
 
+    if(cmd.args[0].find('@') != std::string::npos)
+    {
+        ser->sendData(getFd(),":" + servername + " 461 " + nickname + " :Invalid username\r\n");
+        return ;
+    }
     username = cmd.args[0];
     realname = cmd.args[3];
     

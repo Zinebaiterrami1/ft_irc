@@ -106,6 +106,10 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
         }
         else{
             Channel *chl = ser->get_channel(channels[i]);
+            if(ch->isInviteOnly() && chl->isInvited(client->get_nickname()))
+            {
+                
+            }
             if(chl->hasLimit() && chl->getLimit() <= chl->getUsers().size())
             {
                 ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 475 " + client->get_nickname() 
@@ -127,6 +131,7 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
             else
             {
                 chl->addUser(client);
+                client->c_channels.insert(chl);
                 chl->brodcast_Channel(client->get_nickname() + " Joined the channel\n", client, ser);
                 std::cout << RED << "CLIENT " << client->get_nickname() << " ADDED\n";
             }

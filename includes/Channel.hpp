@@ -15,7 +15,7 @@ private:
 
     std::vector<Client *> users;
     std::vector<Client *> operators;
-    std::set<std::string> invited;
+    std::set<std::string> invited_clients;
     bool inviteOnly;
     bool topicRestricted;
     size_t userLimit;
@@ -34,9 +34,9 @@ public:
     bool hasKey();
     bool hasLimit();
 
-    void addOperator(Client *client);
+    void addOperator(Client *client) const;
     bool isOperator(Client *client) const;
-
+    bool isInvited(Client *client) const;
     void setTopic(const std::string &newTopic);
 
     void setInviteOnly(bool mode);

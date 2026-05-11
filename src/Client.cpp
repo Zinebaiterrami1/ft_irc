@@ -31,6 +31,10 @@ void Client::set_hostname(const std::string& host)
     client_hostname = host;
 }
 
+const std::string &Client::get_nickname() const { 
+    return nickname;
+}
+
 void Client::check_register()
 {
     if(c_password && c_nick && c_user && !Authenticated)

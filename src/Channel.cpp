@@ -138,7 +138,7 @@ bool Channel::hasUser(Client *client) const
 }
 
 
-void Channel::addOperator(Client *client)
+void Channel::addOperator(Client *client) const
 {
     operators.push_back(client);
 }
@@ -153,6 +153,10 @@ bool Channel::isOperator(Client *client) const
     return false;
 }
 
+bool Channel::isInvited(Client *client) const
+{
+    return invited_clients.find(client->get_nickname()) != std::npos;
+}
 
 void Channel::setTopic(const std::string &newTopic)
 {

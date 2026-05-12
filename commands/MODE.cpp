@@ -89,7 +89,9 @@ void Client::HandledMODE(const Commandeparse &cmd)
                 if (sign == '+' && idx < param.size())
                     chl->setUserLimit(std::atoi(param[idx++].c_str()));
                 else if (sign == '-')
-                    chl->setUserLimit(0);
+                {
+                    chl->removeUserLimit();
+                }
             }
             else if (m == 'o')
             {

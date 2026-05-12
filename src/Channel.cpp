@@ -6,6 +6,7 @@ Channel::Channel()
     : name(""), topic(""),
       inviteOnly(false),
       topicRestricted(false),
+      limitenabled(false),
       userLimit(-1)
 {
 }
@@ -40,7 +41,7 @@ bool Channel::hasKey(){
 }
 
 bool Channel::hasLimit(){
-    return userLimit != -1;
+     return limitenabled;;
 }
 
 size_t Channel::getLimit(){
@@ -147,6 +148,7 @@ bool Channel::isOperator(Client *client) const
     return false;
 }
 
+
 bool Channel::isInvited(Client *client) const
 {
     return invited.find(client->get_nickname()) != invited.end();
@@ -174,6 +176,7 @@ void Channel::setKey(const std::string &k)
 
 void Channel::setUserLimit(size_t limit)
 {
+    limitenabled = true;
     userLimit = limit;
 }
 
@@ -181,6 +184,11 @@ void Channel::setUserLimit(size_t limit)
 bool Channel::isInviteOnly() const
 {
     return inviteOnly;
+}
+
+void Channel::removeUserLimit()
+{
+    limitenabled = false;
 }
 
 size_t Channel::getUserLimit() const

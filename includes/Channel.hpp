@@ -18,6 +18,7 @@ private:
     std::set<std::string> invited;
     bool inviteOnly;
     bool topicRestricted;
+    bool limitenabled;
     int userLimit;
 
 public:
@@ -47,7 +48,7 @@ public:
 
     std::string getKey();
     size_t getLimit();
-
+    void removeUserLimit();
 
     bool isInviteOnly() const;
     bool istopicRestricted() const {return topicRestricted;}
@@ -55,6 +56,5 @@ public:
     void add_invite(const std::string& nickname);
     const std::vector<Client *> &getUsers() const;
     std::string get_mode() const;
-
     void brodcast_Channel(const std::string &msg,  Server *ser);
 };

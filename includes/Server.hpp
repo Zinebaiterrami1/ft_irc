@@ -21,7 +21,8 @@
 # include <csignal>
 #include <cstdio>
 # include <sstream>
-#include <map>
+#include <string>
+#include <sstream>
 
 #define RED "\e[1;31m"
 #define WHI "\e[0;37m"
@@ -60,15 +61,22 @@ class Server
         void runSocket();
         void removeClient(int fd, int flag);
         void ClearChannels();
+        void delete_channel(const std::string& name);
         const config& get_config() const { return _config;}
         void StartServer();
         bool nickname_use(const std::string &nick, const Client *cl);
         const std::string &get_hostname() const {return server_hostname;}
         Channel *get_channel(const std::string &name);
+<<<<<<< HEAD
         void initBot();
         bool hasBot() const;
+=======
+        std::vector<Channel*> get_all_channels();
+>>>>>>> 2303fcca100a77b3c9b42a7da417caefad66133f
         Channel *create_channel(const std::string& name);
         Client *find_nicknameclient(const std::string &nick);
+        void message_to_all_channel_commun(Client *cl,const std::string& mesg );
 };
+
 
 

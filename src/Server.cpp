@@ -13,7 +13,7 @@ Server::~Server()
     if(_srvSoc_fd != -1)
         close(_srvSoc_fd);
 }
-Channel* Server::get_channel(const std::string &name)
+Channel *Server::get_channel(const std::string &name)
 {
     for (size_t i = 0; i < Channels.size(); i++)
     {
@@ -22,7 +22,12 @@ Channel* Server::get_channel(const std::string &name)
     }
     return NULL;
 }
-Channel* Server::create_channel(const std::string &name)
+
+std::vector<Channel*> Server::get_all_channels(){
+    return Channels;
+}
+
+Channel *Server::create_channel(const std::string &name)
 {
     for (size_t i = 0; i < Channels.size(); i++)
     {
@@ -33,6 +38,20 @@ Channel* Server::create_channel(const std::string &name)
     Channel *ch = new Channel(name);
     Channels.push_back(ch);
     return ch;
+}
+void Server::delete_channel(const std::string& name)
+{
+    for (std::vector<Channel*>::iterator it = Channels.begin();
+         it != Channels.end();
+         ++it)
+    {
+        if ((*it)->getName() == name)
+        {
+            delete *it;          
+            Channels.erase(it); 
+            return;
+        }
+    }
 }
 
 Client *Server::getClient(int fd){
@@ -67,7 +86,39 @@ Client* Server::find_nicknameclient(const std::string &nick)
     }
     return NULL;
 }
+void Server::message_to_all_channel_commun(Client *cl, const std::string &msg)
+{
+    if (!cl)
+        return;
 
+    std::set<Client *> notified;
+
+    const std::set<Channel *> &channels = cl->c_channels;
+
+    for (std::set<Channel *>::const_iterator it = channels.begin();
+         it != channels.end();
+         ++it)
+    {
+        Channel *ch = *it;
+        if (!ch)
+            continue;
+
+        const std::vector<Client *> &members = ch->getUsers();
+
+        for (size_t j = 0; j < members.size(); j++)
+        {
+            Client *recipient = members[j];
+
+            if (!recipient || recipient == cl)
+                continue;
+
+            if (notified.insert(recipient).second)
+            {
+                sendData(recipient->getFd(), msg);
+            }
+        }
+    }
+}
 void signalHandler(int signum)
 {
     (void)signum;
@@ -146,11 +197,8 @@ bool Server::initSocket()
         close(_srvSoc_fd);
         return false;
     }
-    char hostname[256];
-    if(!gethostname(hostname, sizeof(hostname)))
-        server_hostname = hostname;
-    else
-        server_hostname = "localhost";
+    
+    server_hostname = "ft_irc_server";
     struct pollfd ev;
 
     ev.fd = _srvSoc_fd;
@@ -180,42 +228,86 @@ void Server::addNewClient()
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
     clientPollFd.revents = 0;
-    Client *client = new Client(clientFd); //tat2kedo mnha 7it lmochkil fconstruct dakci 3elach zedtha
+    Client *client = new Client(
+    clientFd,
+    inet_ntoa(clientAddr.sin_addr));
+    client->ser = this;
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
     fds.push_back(clientPollFd);
     std::cout << "New client connected: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
+// void Server::receiveData(int clientFd)
+// {
+//     char tmp[1024];
+//     tmp[0] = '\0';
+//     Client &client = *getClient(clientFd);
+//     std::string &buffer = client.read_buffer;
+    
+//     int bytes = recv(clientFd, tmp, sizeof(tmp)-1, 0);
+//     tmp[bytes] = '\0';
+
+//     if(bytes > 0){//append buffer 
+//         buffer += tmp;
+//         size_t found = buffer.find('\n');
+        
+//         if(found != std::string::npos)//donne a parse commande et execute
+//         {
+//             int x = buffer[found-1] != '\r'?0:1;
+//             std::string cmd = buffer.substr(0, found-x);
+//             if(cmd.length() > 510)
+//                 return;
+//             buffer = buffer.substr(found+1, buffer.length());
+//             client.execute(parser_commande(cmd));
+//         }
+//     }
+//     else if(bytes == 0){//connection close //remove client
+//         //leave all channels
+//         //remove frome clients in server 
+//         removeClient(clientFd, 0);
+//     }
+//     else{//an error occured perror()
+//         perror("recv : ");
+//     }
+// }
+
 void Server::receiveData(int clientFd)
 {
     char tmp[1024];
-    tmp[0] = '\0';
     Client &client = *getClient(clientFd);
     std::string &buffer = client.read_buffer;
-    
-    int bytes = recv(clientFd, tmp, sizeof(tmp)-1, 0);
+
+    int bytes = recv(clientFd, tmp, sizeof(tmp) - 1, 0);
+
+    if (bytes <= 0)
+    {
+        if (bytes == 0)
+            removeClient(clientFd, 0);
+        else
+            perror("recv");
+        return;
+    }
+
     tmp[bytes] = '\0';
-    if(bytes > 0){//append buffer 
-        buffer += tmp;
-        size_t found = buffer.find('\n');
-        if(found != std::string::npos){
-            //donne a parse commande et execute
-            int x = buffer[found-1] != '\r'?0:1;
-            std::string cmd = buffer.substr(0, found-x);
-            if(cmd.length() > 510)
-                throw 45;
-            buffer = buffer.substr(found+1, buffer.length());
-            client.execute(parser_commande(cmd));
-        }
-    }
-    else if(bytes == 0){//connection close //remove client
-        //leave all channels
-        //remove frome clients in server 
-        removeClient(clientFd, 0);
-    }
-    else{//an error occured perror()
-        perror("recv : ");
+    buffer += tmp;
+
+    size_t pos;
+
+    while ((pos = buffer.find('\n')) != std::string::npos)
+    {
+        std::string line = buffer.substr(0, pos);
+        buffer.erase(0, pos + 1);
+
+        // clean \r
+        if (!line.empty() && line[line.length() - 1] == '\r')
+            line.erase(line.length() - 1);
+
+        if (line.length() > 510)
+            continue;
+
+        if (!line.empty())
+            client.execute(parser_commande(line));
     }
 }
 

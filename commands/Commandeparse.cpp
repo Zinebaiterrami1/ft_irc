@@ -1,48 +1,57 @@
-#include<iostream>
-#include<string>
+#include <iostream>
+#include <string>
 #include <vector>
+#include <algorithm>
 #include "../includes/Commandeparse.hpp"
-#include "../includes/CommandHandler.hpp"
-
-
+#include "../includes/Server.hpp"
 
 Commandeparse parser_commande(std::string &line)
 {
+    std::cout<< RED << line << std::endl;
     Commandeparse cmd;
     std::string word;
-    bool after_colon = false;
-    for(size_t i = 0; i < line.size(); i++)
+
+    // 🔥 remove \r and \n safely (important for HexChat)
+    line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+    line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
+
+    for (size_t i = 0; i < line.size(); i++)
     {
         char c = line[i];
-        if (c == '\r' || c == '\n')
-            continue;
 
-        if(c == ' ' && !after_colon)
+        // SPACE = separator (except after ':')
+        if (c == ' ')
         {
-            if(!word.empty())
+            if (!word.empty())
             {
-                if(cmd.name.empty())
-                {
+                if (cmd.name.empty())
                     cmd.name = word;
-                }
                 else
                     cmd.args.push_back(word);
+
                 word.clear();
             }
         }
-        else if(c == ':')
+        // ':' = trailing parameter (IRC rule)
+        else if (c == ':' && (i == 0 || line[i - 1] == ' '))
         {
-            if(!word.empty())
+            if (!word.empty())
             {
-                if(cmd.name.empty())
+                if (cmd.name.empty())
                     cmd.name = word;
                 else
                     cmd.args.push_back(word);
-               word.clear();
 
+                word.clear();
             }
-                cmd.args.push_back(line.substr(i + 1));
-                break;
+
+            // skip spaces after ':'
+            size_t start = i + 1;
+            while (start < line.size() && line[start] == ' ')
+                start++;
+
+            cmd.args.push_back(line.substr(start));
+            break;
         }
         else
         {
@@ -50,32 +59,14 @@ Commandeparse parser_commande(std::string &line)
         }
     }
 
-    if(!word.empty())
+    // last word flush
+    if (!word.empty())
     {
-        if(cmd.name.empty())
-            cmd.name =word;
+        if (cmd.name.empty())
+            cmd.name = word;
         else
             cmd.args.push_back(word);
     }
+
     return cmd;
 }
-// int main()
-// {
-//     std::vector<std::string> tests;
-
-//     // tests.push_back("JOIN #a");
-//     // tests.push_back("KICK #a bob :bad user");
-//     tests.push_back("PRIVMSG #a :hello world");
-//     // tests.push_back("TOPIC #a :new topic");
-
-//     CommandHandler handler;
-
-//     for (size_t i = 0; i < tests.size(); i++)
-//     {
-//         Commandeparse cmd = parser_commande(tests[i]);
-
-//         std::cout << "\nINPUT: " << tests[i] << std::endl;
-
-//         execute(cmd);
-//     }
-// }

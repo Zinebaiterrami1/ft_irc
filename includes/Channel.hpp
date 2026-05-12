@@ -3,22 +3,22 @@
 #include <string>
 #include <vector>
 #include "../includes/Client.hpp"
-
+#include<set>
 class Client;
-
+class Server;
 class Channel
 {
 private:
     std::string name;
     std::string topic;
+    std::string key;
 
     std::vector<Client *> users;
     std::vector<Client *> operators;
-
+    std::set<std::string> invited;
     bool inviteOnly;
     bool topicRestricted;
-    std::string key;
-    int userLimit;
+    size_t userLimit;
 
 public:
     Channel();
@@ -29,7 +29,10 @@ public:
 
     void addUser(Client *client);
     void removeUser(Client *client);
+    void removeOperator(Client *client);
     bool hasUser(Client *client) const;
+    bool hasKey();
+    bool hasLimit();
 
     void addOperator(Client *client);
     bool isOperator(Client *client) const;
@@ -39,12 +42,18 @@ public:
     void setInviteOnly(bool mode);
     void setTopicRestricted(bool mode);
     void setKey(const std::string &k);
-    void setUserLimit(int limit);
+    void setUserLimit(size_t limit);
+
+    std::string getKey();
+    size_t getLimit();
+
 
     bool isInviteOnly() const;
-    int getUserLimit() const;
-
+    bool istopicRestricted() const {return topicRestricted;}
+    size_t getUserLimit() const;
+    void add_invite(const std::string& nickname);
     const std::vector<Client *> &getUsers() const;
+    std::string get_mode() const;
 
-    void sendMsgClient(const std::string &msg, Client *sender);
+    void brodcast_Channel(const std::string &msg,  Server *ser);
 };

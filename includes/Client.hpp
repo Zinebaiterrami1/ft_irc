@@ -12,6 +12,7 @@ class Client{
         std::string nickname;// if nick
         std::string username;// if user
         std::string hostname;
+        std::string realname;
         std::string client_hostname;
         std::set<Channel*> c_channels;
         std::string read_buffer;
@@ -23,8 +24,9 @@ class Client{
 
     public :
         Client(int fd, char *hostname);
+        // Client();
         ~Client();
-        Client(int fd) : fd(fd) {}
+        // Client(int fd) : fd(fd) {}
 
         void set_hostname(const std::string& host);
         
@@ -37,6 +39,8 @@ class Client{
         bool in_channel(Channel *chan) const;
         const std::string &get_nickname() const { return nickname;}
         void check_register();
+        void renoveChannel(Channel *chan);
+        void delete_channel(const std::string& name);
         void HandledJOIN(const Commandeparse &cmd);
         void HandledKICK(const Commandeparse &cmd);
         void HandledINVITE(const Commandeparse &cmd);
@@ -46,6 +50,7 @@ class Client{
         void HandledPASS(const Commandeparse &cmd);
         void HandledUSER(const Commandeparse &cmd);
         void HandledNICK(const Commandeparse &cmd);
+<<<<<<< HEAD
         void HandledPART(const Commandeparse &cmd);
         //=======================| BOT :) |==================================//
         void HandleBOT(std::string msg);
@@ -57,6 +62,9 @@ class Client{
         void setClientNickName() const;
 
         void botJoinChannel(Channel* channel);
+=======
+        void HandledPART(const Commandeparse &cmd);        
+>>>>>>> 2303fcca100a77b3c9b42a7da417caefad66133f
 };
 
 

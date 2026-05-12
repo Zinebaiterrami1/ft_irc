@@ -20,17 +20,32 @@ Channel::Channel(const std::string &channelName)
 }
 
 
-void Channel::sendMsgClient(const std::string &msg, Client *sender)
+void Channel::brodcast_Channel(const std::string &msg,  Server *ser)
 {
     for (size_t i = 0; i < users.size(); i++)
     {
-        if (users[i] != sender)
-        {
-            users[i]->create_reply(msg);
-        }
+        Client *recipient = users[i];
+
+        if (recipient)
+            ser->sendData(recipient->getFd(), msg);
     }
 }
 
+std::string Channel::getKey(){
+    return key;
+}
+
+bool Channel::hasKey(){
+    return !key.empty();
+}
+
+bool Channel::hasLimit(){
+    return userLimit != (size_t)-1;
+}
+
+size_t Channel::getLimit(){
+    return userLimit;
+}
 
 std::string Channel::getName() const
 {
@@ -42,7 +57,37 @@ std::string Channel::getTopic() const
     return topic;
 }
 
+std::string Channel::get_mode() const
+{
+    std::string modes = "+";
+    std::string param;
 
+    if (inviteOnly)
+        modes += 'i';
+
+    if (topicRestricted)
+        modes += 't';
+
+    if (!key.empty())
+    {
+        modes += 'k';
+        param += " " + key;
+    }
+
+    if (userLimit > 0)
+    {
+        std::stringstream value;
+        value << userLimit;
+
+        modes += 'l';
+        param += " " + value.str();
+    }
+
+    if (modes == "+")
+        return "";
+
+    return modes + param;
+}
 void Channel::addUser(Client *client)
 {
     users.push_back(client);
@@ -58,7 +103,27 @@ void Channel::removeUser(Client *client)
             return;
         }
     }
+    for (size_t i = 0; i < operators.size(); i++)
+    {
+        if (operators[i] == client)
+        {
+            operators.erase(operators.begin() + i);
+            return;
+        }
+    }
 }
+
+void Channel::removeOperator(Client *client){
+    for (size_t i = 0; i < operators.size(); i++)
+    {
+        if (operators[i] == client)
+        {
+            operators.erase(operators.begin() + i);
+            return;
+        }
+    }
+}
+
 
 bool Channel::hasUser(Client *client) const
 {
@@ -107,7 +172,7 @@ void Channel::setKey(const std::string &k)
     key = k;
 }
 
-void Channel::setUserLimit(int limit)
+void Channel::setUserLimit(size_t limit)
 {
     userLimit = limit;
 }
@@ -118,7 +183,7 @@ bool Channel::isInviteOnly() const
     return inviteOnly;
 }
 
-int Channel::getUserLimit() const
+size_t Channel::getUserLimit() const
 {
     return userLimit;
 }
@@ -126,4 +191,9 @@ int Channel::getUserLimit() const
 const std::vector<Client *> &Channel::getUsers() const
 {
     return users;
+}
+
+void Channel::add_invite(const std::string& nickname)
+{
+    invited.insert(nickname);
 }

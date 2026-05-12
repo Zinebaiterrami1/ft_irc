@@ -7,11 +7,9 @@
 
 Commandeparse parser_commande(std::string &line)
 {
-    std::cout<< RED << line << std::endl;
     Commandeparse cmd;
     std::string word;
 
-    // 🔥 remove \r and \n safely (important for HexChat)
     line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
     line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
 
@@ -19,7 +17,6 @@ Commandeparse parser_commande(std::string &line)
     {
         char c = line[i];
 
-        // SPACE = separator (except after ':')
         if (c == ' ')
         {
             if (!word.empty())
@@ -32,7 +29,6 @@ Commandeparse parser_commande(std::string &line)
                 word.clear();
             }
         }
-        // ':' = trailing parameter (IRC rule)
         else if (c == ':' && (i == 0 || line[i - 1] == ' '))
         {
             if (!word.empty())
@@ -45,7 +41,6 @@ Commandeparse parser_commande(std::string &line)
                 word.clear();
             }
 
-            // skip spaces after ':'
             size_t start = i + 1;
             while (start < line.size() && line[start] == ' ')
                 start++;
@@ -59,7 +54,6 @@ Commandeparse parser_commande(std::string &line)
         }
     }
 
-    // last word flush
     if (!word.empty())
     {
         if (cmd.name.empty())

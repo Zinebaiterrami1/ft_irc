@@ -50,8 +50,8 @@ int main(int ac, char **av)
             return 1;
         }
         
-        std::cout << "Port: " << con.port << std::endl;
-        std::cout << "Password: " << con.password << std::endl;
+        std::cout << MAG << "Port: " << con.port << std::endl;
+        std::cout << "Password: " << con.password << RESET << std::endl;
 
         Server ser(con);
         ser.StartServer();

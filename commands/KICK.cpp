@@ -1,4 +1,3 @@
-#include "../includes/CommandHandler.hpp"
 #include<cctype>
 #include "../includes/config.hpp"
 #include "../includes/Commandeparse.hpp"
@@ -17,7 +16,7 @@ void Client::HandledKICK(const Commandeparse &cmd)
         return ;
     }
 
-    const std::string& target = cmd.args[0]; // hna semiya ta3 channel
+    const std::string& target = cmd.args[0]; 
     const std::string& nick = cmd.args[1];
 
     std::string reason;

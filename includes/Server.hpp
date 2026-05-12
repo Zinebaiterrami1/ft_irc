@@ -12,7 +12,6 @@
 # include <vector>
 # include "../includes/Client.hpp"
 # include "../includes/Channel.hpp"
-# include "../includes/CommandHandler.hpp"
 # include "../includes/Commandeparse.hpp"
 # include <poll.h>
 # include <unistd.h>
@@ -41,7 +40,6 @@ class Server
         struct sockaddr_in _address;
         std::vector<Client*> clients;
         std::vector<struct pollfd> fds;
-        // std::vector<Channel*> channels;
         std::map<std::string, Channel*> channels;
         std::vector<int> ClientFds;
         config _config;

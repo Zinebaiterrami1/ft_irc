@@ -1,4 +1,3 @@
-#include "../includes/CommandHandler.hpp"
 #include<cctype>
 #include "../includes/config.hpp"
 #include "../includes/Commandeparse.hpp"
@@ -31,12 +30,11 @@ void Client::HandledINVITE(const Commandeparse &cmd)
         ser->sendData(getFd(),":" + servername + " 403 " + nickname + " " + name_channel + " :No such channel\r\n");
         return ;
     }
-    if(cl_target->in_channel(ch)) // hadi mam2kedach ta n teter
+    if(cl_target->in_channel(ch)) 
     {
         ser->sendData(getFd(),":" + servername + " 443 " + nickname + " " + nick+ " " + name_channel + " :is already on channel\r\n");
         return ;
     }
-    // hna rani handlit ta3 + i mode
     if(ch->isInviteOnly() && !ch->isOperator(this))
     {
         ser->sendData(getFd(), ":" + servername + " 482 " + nickname + " " + name_channel + " :You're not channel operator\r\n");

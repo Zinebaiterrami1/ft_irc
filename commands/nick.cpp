@@ -1,4 +1,3 @@
-#include "../includes/CommandHandler.hpp"
 #include <cctype>
 #include "../includes/config.hpp"
 #include "../includes/Commandeparse.hpp"
@@ -31,7 +30,6 @@ bool is_special(unsigned char c)
 
 void Client::HandledNICK(const Commandeparse &cmd)
 {
-    // std::cout << cmd.name << "\n";
 
     std::string servername = ser->get_hostname();
 

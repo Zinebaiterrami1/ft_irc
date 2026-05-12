@@ -39,7 +39,7 @@ public:
     bool isOperator(Client *client) const;
     bool isInvited(Client *client) const;
     void setTopic(const std::string &newTopic);
-
+    bool hasClient(const Client *client) const;
     void setInviteOnly(bool mode);
     void setTopicRestricted(bool mode);
     void setKey(const std::string &k);

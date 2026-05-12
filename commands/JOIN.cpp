@@ -120,13 +120,13 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
         if(chl->hasLimit() && chl->getLimit() <= chl->getUsers().size())
         {
             ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 471 " + client->get_nickname() 
-            + " can not JOIN " + chl->getName() + " Limits reached\r\n");
+            + " " + channel_name + "  :Cannot join channel (+l)\r\n");
             continue;
         }
         if((chl->hasKey() && i >= keys.size() )|| (chl->hasKey() && keys[i] != chl->getKey()))
         {
             ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 475 " + client->get_nickname() 
-            + " " + channel_name + " :Cannot join channel (+l)\r\n");
+            + " " + channel_name + " :Cannot join channel (+k)\r\n");
             continue;
         }
         if(client->in_channel(chl))
@@ -145,8 +145,8 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
         chl->addUser(client);
         client->c_channels.insert(chl);
 
-        std::string msg = ":" + client->get_prefix() + " JOIN " + channel_name + "\r\n";
-        ser->sendData(client->getFd(), msg);
+        std::string msg = ":" + client->get_prefix() + " JOIN :" + channel_name + "\r\n";
+        // ser->sendData(client->getFd(), msg);
         chl->brodcast_Channel(msg, ser);
 
         std::cout << RED << "CLIENT " << client->get_nickname() << "JOINED  TO CHANNEL " << channel_name <<"\n";
@@ -174,7 +174,7 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
         list_users += "\r\n";
         ser->sendData(client->getFd(), list_users);
         ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 366 " + client->get_nickname() 
-                        + " " + channel_name + " :End of /NAMES list\r\n");
+                        + " " + channel_name + " :End of /NAMES list.\r\n");
     }
 }
 

@@ -22,10 +22,6 @@ int Client::getFd(){
     return fd;
 }
 
-// void Client::create_reply(const std::string &buffer)
-// {
-//     write_buffer += buffer;
-// }
 void Client::set_hostname(const std::string& host)
 {
     client_hostname = host;
@@ -84,7 +80,6 @@ void Client::execute(const Commandeparse &cmd)
     if (name == "CAP" || name == "PING" || name == "PONG" || name == "WHO" || name == "QUIT")
         return;
 
-    std::cout << name << std::endl;
 
     if (name == "JOIN")
         HandledJOIN(cmd);
@@ -107,7 +102,7 @@ void Client::execute(const Commandeparse &cmd)
     else if (name == "PART")
         HandledPART(cmd);
     else
-        std::cerr << "Unknown Command " << std::endl;
+        ser->sendData(getFd(),":" + ser->get_hostname() + " 421 " + nickname + " " + name + " :Unknown command\r\n");
 }
 
 std::string Client::getClientUserName() const
@@ -130,53 +125,3 @@ void Client::setClientNickName(std::string nname)
     nickname = nname;
 }
 
-// void Client::botJoinChannel(Channel *channel)
-// {
-//     if(!hasBot())
-//     {
-//         //bot join logic, 
-//         channel->addClient(bot);
-//         //🔥 Then optionally broadcast JOIN message
-//         std::string joinmssg = ":" + bot->get_prefix() + "@server JOIN " + channel->getName()
-//                                 + "\r\n";
-//         sendMsgClient(joinmssg, bot);
-//     }
-// }
-
-// void Client::HandleBOT(std::string mssg)
-// {
-//     std::string replay;
-
-//     if(mssg == "!hello")
-//     {
-//         replay = ":" + bot->getClientNickName() + "!" + bot->getClientUserName() + "@server PRIVMSG " + channel->getName()
-//                 + "Hi There 👋​";
-//     }
-//     else if(mssg == "!dice")
-//     {
-//         int random_num = rand() % 101; //give random number 0 - 100
-//         //convert int to string
-//         std::stringstream ss;
-//         ss << random_num;
-//         std::string num_str = ss.str();
-
-//         replay = ":" + bot->getClientNickName() + "!" + bot->getClientUserName() + "@server PRIVMSG " + channel->getName()
-//                 + "random number 🎲(0 - 100)​: " + num_str + "\r\n";
-//     }
-//     else if(mssg == "!help")
-//     {
-//         replay = ":" + bot->getClientNickName() + "!" + bot->getClientUserName() + "@server PRIVMSG " + channel->getName()
-//                 + "👀​ Commands: !hello, !help, !dice, !time" + "\r\n";
-//     }
-//     else if(mssg == "!time")
-//     {
-//         time_t current_time = time(0);
-//         char buffer[80];
-//         strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localtime(&current_time));
-//         replay = ":" + bot->getClientNickName() + "!" + bot->getClientUserName() + "@server PRIVMSG " + channel->getName()
-//                 + "⏰ Current time is : " + buffer + "\r\n";
-//     }
-//     if(!replay.empty())
-//         sendMsgClient(replay, bot);
-//         std::cerr << "Unknown Command" << std::endl;
-// }

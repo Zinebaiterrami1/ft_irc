@@ -349,7 +349,6 @@ void Server::sendData(int fd, std::string mssg)
 
 void Server::removeClient(int fd, int flag)
 {
-    //remove from poll vector, vector clientfds, client
     if(flag)
     {
         std::vector<Client*>::iterator it = this->clients.begin();
@@ -361,7 +360,6 @@ void Server::removeClient(int fd, int flag)
         this->clients.clear();
         return ;
     }
-    // Remove from pollfd vector
     for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
     {
         if(it->fd == fd)
@@ -370,7 +368,6 @@ void Server::removeClient(int fd, int flag)
             break;
         }
     }
-    //remove from client fds vector
     for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
     {
         if(*it == fd)
@@ -386,14 +383,12 @@ void Server::removeClient(int fd, int flag)
 void Server::CloseConnection()
 {
     std::cout << "Closing all connections..." << std::endl;
-    //close sockets of every client here
     for(std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
     {
         close((*it)->getFd());
         delete *it;
     }
     
-    //close socket of server
     if(this->_srvSoc_fd != -1)
     {
         close(_srvSoc_fd);
@@ -420,7 +415,6 @@ void Server::runSocket()
 
 void Server::StartServer()
 {
-    //call run socket. create event loop, if client new create it, if not receive his data, if signal received, shut down server
     runSocket();
     while(!sig)
     {
@@ -435,12 +429,10 @@ void Server::StartServer()
             {
                 if(fds[i].fd == _srvSoc_fd)
                 {
-                    //add new client
                     addNewClient();
                 }
                 else
                 {
-                    //receive data from existing client
                     receiveData(fds[i].fd);
                 }
             }
@@ -451,22 +443,3 @@ void Server::StartServer()
     ClearChannels();
 }
 
-// void Server::initBot()
-// {
-//     bot = new Client();
-//     bot->setClientUserName("bot");
-//     bot->setClientNickName("bot");
-//     clients.push_back(bot); // add bot as client
-// }
-
-// bool Server::hasBot() const
-// {
-//     for (std::vector<Client*>::const_iterator it = clients.begin(); it != clients.end(); ++it)
-//     {
-//         if(*it && (*it)->getClientNickName == "bot")
-//         {
-//             return true;
-//         }
-//     }
-//     return false;
-// }

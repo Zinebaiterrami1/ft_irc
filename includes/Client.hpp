@@ -8,9 +8,9 @@ class Server;
 class Channel;
 class Client{
     public :
-        int fd; //socket du client
-        std::string nickname;// if nick
-        std::string username;// if user
+        int fd; 
+        std::string nickname;
+        std::string username;
         std::string hostname;
         std::string realname;
         std::string client_hostname;
@@ -24,9 +24,7 @@ class Client{
 
     public :
         Client(int fd, char *hostname);
-        // Client();
         ~Client();
-        // Client(int fd) : fd(fd) {}
 
         void set_hostname(const std::string& host);
         
@@ -50,17 +48,13 @@ class Client{
         void HandledUSER(const Commandeparse &cmd);
         void HandledNICK(const Commandeparse &cmd);
         void HandledPART(const Commandeparse &cmd);
-        //=======================| BOT :) |==================================//
-        // void HandleBOT(std::string msg);
 
-        //======================| getters & setters |=============================//
         std::string getClientUserName() const;
         std::string getClientNickName() const;
         void setClientUserName(std::string uname);
         void setClientNickName(std::string nname);
 
         void botJoinChannel(Channel* channel);
-        // void HandledPART(const Commandeparse &cmd);        
 };
 
 

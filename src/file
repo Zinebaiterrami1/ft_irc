@@ -1,8 +1,0 @@
-we say first, we initsocket so we have lisenin socket wait for incomin connection when we create socket,
-we enter the loop here first thin we call poll to create poll event then we check on file desc of poll that we store in socket
-to see if this client is new or not,
-if new we go to accept it and create the socket that will listen to server socket and communicate, 
-if already the fd is in poll so here we recv data from the client with recv that reads from socket, 
-also here poll is on mode pollin to read commande after recv, 
-and we know which commande we send the message and response, 
-throught send, is there pollout to switch to write? and is my explanation is good

@@ -103,7 +103,6 @@ void Client::execute(const Commandeparse &cmd)
     else if (name == "PART")
         HandledPART(cmd);
     else
-<<<<<<< HEAD
         std::cerr << "Unknown Command " << std::endl;
 }
 
@@ -175,7 +174,5 @@ void Client::HandleBOT(std::string mssg)
     }
     if(!replay.empty())
         sendMsgClient(replay, bot);
-=======
         std::cerr << "Unknown Command" << std::endl;
->>>>>>> 2303fcca100a77b3c9b42a7da417caefad66133f
 }

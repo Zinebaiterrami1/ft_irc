@@ -49,7 +49,18 @@ class Client{
         void HandledPASS(const Commandeparse &cmd);
         void HandledUSER(const Commandeparse &cmd);
         void HandledNICK(const Commandeparse &cmd);
-        void HandledPART(const Commandeparse &cmd);        
+        void HandledPART(const Commandeparse &cmd);
+        //=======================| BOT :) |==================================//
+        // void HandleBOT(std::string msg);
+
+        //======================| getters & setters |=============================//
+        std::string getClientUserName() const;
+        std::string getClientNickName() const;
+        void setClientUserName(std::string uname);
+        void setClientNickName(std::string nname);
+
+        void botJoinChannel(Channel* channel);
+        // void HandledPART(const Commandeparse &cmd);        
 };
 
 

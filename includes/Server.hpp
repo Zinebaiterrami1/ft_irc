@@ -41,10 +41,13 @@ class Server
         struct sockaddr_in _address;
         std::vector<Client*> clients;
         std::vector<struct pollfd> fds;
+        // std::vector<Channel*> channels;
+        std::map<std::string, Channel*> channels;
         std::vector<int> ClientFds;
         config _config;
         std::vector<Channel*> Channels;
         std::string server_hostname;
+        Client *bot;
     public:
         static bool sig;
         Server(const config &cfg);
@@ -64,6 +67,8 @@ class Server
         bool nickname_use(const std::string &nick, const Client *cl);
         const std::string &get_hostname() const {return server_hostname;}
         Channel *get_channel(const std::string &name);
+        void initBot();
+        bool hasBot() const;
         std::vector<Channel*> get_all_channels();
         Channel *create_channel(const std::string& name);
         Client *find_nicknameclient(const std::string &nick);

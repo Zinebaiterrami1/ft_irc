@@ -46,7 +46,10 @@ void leaveAll(std::vector<Channel*> ch,Client *client)
     for(size_t i = 0; i < ch.size(); i++)
     {
         if(ch[i]->hasUser(client))
+        {
             ch[i]->removeUser(client);
+            ch[i]->removeOperator(client);
+        }
     }
 }
 

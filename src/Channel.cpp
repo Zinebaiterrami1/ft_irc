@@ -103,14 +103,6 @@ void Channel::removeUser(Client *client)
             return;
         }
     }
-    for (size_t i = 0; i < operators.size(); i++)
-    {
-        if (operators[i] == client)
-        {
-            operators.erase(operators.begin() + i);
-            return;
-        }
-    }
 }
 
 void Channel::removeOperator(Client *client){

@@ -450,3 +450,23 @@ void Server::StartServer()
     CloseConnection();
     ClearChannels();
 }
+
+// void Server::initBot()
+// {
+//     bot = new Client();
+//     bot->setClientUserName("bot");
+//     bot->setClientNickName("bot");
+//     clients.push_back(bot); // add bot as client
+// }
+
+// bool Server::hasBot() const
+// {
+//     for (std::vector<Client*>::const_iterator it = clients.begin(); it != clients.end(); ++it)
+//     {
+//         if(*it && (*it)->getClientNickName == "bot")
+//         {
+//             return true;
+//         }
+//     }
+//     return false;
+// }

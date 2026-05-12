@@ -18,7 +18,7 @@ private:
     std::set<std::string> invited;
     bool inviteOnly;
     bool topicRestricted;
-    size_t userLimit;
+    int userLimit;
 
 public:
     Channel();
@@ -29,6 +29,7 @@ public:
 
     void addUser(Client *client);
     void removeUser(Client *client);
+    void removeInvite(Client *client);
     void removeOperator(Client *client);
     bool hasUser(Client *client) const;
     bool hasKey();
@@ -36,7 +37,7 @@ public:
 
     void addOperator(Client *client);
     bool isOperator(Client *client) const;
-
+    bool isInvited(Client *client) const;
     void setTopic(const std::string &newTopic);
 
     void setInviteOnly(bool mode);

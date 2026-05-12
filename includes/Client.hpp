@@ -34,10 +34,9 @@ class Client{
         std::string get_prefix() const;
         
         void execute(const Commandeparse &cmd);
-        void create_reply(const std::string &buffer);
 
         bool in_channel(Channel *chan) const;
-        const std::string &get_nickname() const { return nickname;}
+        const std::string &get_nickname() const;
         void check_register();
         void renoveChannel(Channel *chan);
         void delete_channel(const std::string& name);

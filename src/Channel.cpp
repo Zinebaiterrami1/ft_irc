@@ -40,7 +40,7 @@ bool Channel::hasKey(){
 }
 
 bool Channel::hasLimit(){
-    return userLimit != (size_t)-1;
+    return userLimit != -1;
 }
 
 size_t Channel::getLimit(){
@@ -124,6 +124,10 @@ void Channel::removeOperator(Client *client){
     }
 }
 
+void Channel::removeInvite(Client *client)
+{
+    invited.erase(client->get_nickname());
+}
 
 bool Channel::hasUser(Client *client) const
 {
@@ -136,7 +140,7 @@ bool Channel::hasUser(Client *client) const
 }
 
 
-void Channel::addOperator(Client *client)
+void Channel::addOperator(Client *client) 
 {
     operators.push_back(client);
 }
@@ -151,6 +155,10 @@ bool Channel::isOperator(Client *client) const
     return false;
 }
 
+bool Channel::isInvited(Client *client) const
+{
+    return invited.find(client->get_nickname()) != invited.end();
+}
 
 void Channel::setTopic(const std::string &newTopic)
 {

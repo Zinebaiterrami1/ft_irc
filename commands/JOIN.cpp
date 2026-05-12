@@ -94,44 +94,87 @@ std::vector<std::string> split_Keys(std::vector<std::string> keys){//key1 key2
 //     return true;
 // }
 
-void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::string> keys, Client *client, Server *ser){
-    for(size_t i = 0; i < channels.size(); i++){
-        if(!ser->get_channel(channels[i])){
-            Channel *newChnl;
-            newChnl = ser->create_channel(channels[i]);
-            newChnl->addOperator(client);
-            newChnl->addUser(client);
-            client->c_channels.insert(newChnl);
-            std::cout << MAG << client->get_nickname() <<" " << channels[i] << " CHANNEL CREATED " << RESET << "\n";
+void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::string> keys, Client *client, Server *ser)
+{
+    for(size_t i = 0; i < channels.size(); i++)
+    {
+        Channel *chl = ser->get_channel(channels[i]);
+        if(!chl)
+        {
+            chl = ser->create_channel(channels[i]);
+            chl->addOperator(client);
         }
-        else{
-            Channel *chl = ser->get_channel(channels[i]);
-            if(chl->hasLimit() && chl->getLimit() <= chl->getUsers().size())
-            {
-                ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 475 " + client->get_nickname() 
-                + " can not JOIN " + chl->getName() + " Limits reached\r\n");
-                continue;
-            }
-            if((chl->hasKey() && i >= keys.size() )|| (chl->hasKey() && keys[i] != chl->getKey()))
-            {
-                ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 471 " + client->get_nickname() 
-                + " can not JOIN " + chl->getName() + " Incorrect KEY\r\n");
-                continue;
-            }
-            if(client->in_channel(chl))
-            {
-                ser->sendData(client->getFd(), ":" + ser->get_hostname() + client->get_nickname() 
-                + " is already in channel : " + chl->getName() + "\r\n");
-                continue;
-            }
-            else
-            {
-                chl->addUser(client);
-                chl->brodcast_Channel(client->get_nickname() + " Joined the channel\n", ser);
-                std::cout << RED << "CLIENT " << client->get_nickname() << " ADDED\n";
-            }
+        std::string channel_name = chl->getName();
+        if(channel_name.empty() || channel_name[0] != '#')
+        {
+            ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 476 " 
+            + client->get_nickname() + " " + channel_name + " :Bad Channel Mask\r\n");
+            continue;
         }
-            // ser->get_channel(channels[i])->addUser(client);
+        if(chl->isInviteOnly() && !chl->isInvited(client))
+        {
+            ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 473 " + client->get_nickname() 
+            + " " + channel_name + " :Cannot join channel (+i)\r\n");
+            continue;
+        }
+        if(chl->hasLimit() && chl->getLimit() <= chl->getUsers().size())
+        {
+            ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 471 " + client->get_nickname() 
+            + " can not JOIN " + chl->getName() + " Limits reached\r\n");
+            continue;
+        }
+        if((chl->hasKey() && i >= keys.size() )|| (chl->hasKey() && keys[i] != chl->getKey()))
+        {
+            ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 475 " + client->get_nickname() 
+            + " " + channel_name + " :Cannot join channel (+l)\r\n");
+            continue;
+        }
+        if(client->in_channel(chl))
+        {
+            continue;
+        }
+        if(chl->isInvited(client))
+        {
+            chl->removeInvite(client);
+        }
+        // if(!chl)
+        // {
+        //     chl = ser->create_channel(channels[i]);
+        //     chl->addOperator(client);
+        // }
+        chl->addUser(client);
+        client->c_channels.insert(chl);
+
+        std::string msg = ":" + client->get_prefix() + " JOIN " + channel_name + "\r\n";
+        ser->sendData(client->getFd(), msg);
+        chl->brodcast_Channel(msg, ser);
+
+        std::cout << RED << "CLIENT " << client->get_nickname() << "JOINED  TO CHANNEL " << channel_name <<"\n";
+
+        if(!chl->getTopic().empty())
+            ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 332 " + client->get_nickname() + " " + channel_name + " :" + chl->getTopic() + "\r\n");
+        else
+            ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 331 " + client->get_nickname() + " " + channel_name + " :No topic is set\r\n");
+
+        std::string list_users = ":" + ser->get_hostname() + " 353 " + client->get_nickname() + " = " + channel_name + " :";
+        std::vector<Client *> all_users = chl->getUsers();
+
+        for(size_t i = 0; i < all_users.size(); i++)
+        {
+            Client *user = all_users[i];
+            if(chl->isOperator(user))
+                list_users += "@";
+
+            list_users += user->get_nickname();
+
+            if (i != all_users.size() - 1)
+                list_users += " ";
+        }
+
+        list_users += "\r\n";
+        ser->sendData(client->getFd(), list_users);
+        ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 366 " + client->get_nickname() 
+                        + " " + channel_name + " :End of /NAMES list\r\n");
     }
 }
 
@@ -141,11 +184,11 @@ void Client::HandledJOIN(const Commandeparse &cmd)
     try{
 
         if(!Authenticated){
-            throw;
+            return;
         }
         if(cmd.args.empty()){
             ser->sendData(getFd(), ":" + ser->get_hostname() + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
-            throw "emty arguments";
+            return;
         }
 
         valideArgs(cmd.args);//if no # //existe 

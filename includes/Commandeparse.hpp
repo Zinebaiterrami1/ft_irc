@@ -11,5 +11,5 @@ class  Commandeparse
 
 
 Commandeparse parser_commande(std::string &line);
-
+std::vector<std::string> split_Channels(std::string chnl);
 

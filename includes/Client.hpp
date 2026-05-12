@@ -56,11 +56,11 @@ class Client{
         //======================| getters & setters |=============================//
         std::string getClientUserName() const;
         std::string getClientNickName() const;
-        void setClientUserName() const;
-        void setClientNickName() const;
+        void setClientUserName(std::string uname);
+        void setClientNickName(std::string nname);
 
         void botJoinChannel(Channel* channel);
-        void HandledPART(const Commandeparse &cmd);        
+        // void HandledPART(const Commandeparse &cmd);        
 };
 
 

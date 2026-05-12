@@ -120,14 +120,14 @@ std::string Client::getClientNickName() const
     return nickname;
 }
 
-void Client::setClientUserName(std::string uname) const
+void Client::setClientUserName(std::string uname)
 {
     username = uname;
 }
 
-void Client::setClientNickName(std::string nname) const
+void Client::setClientNickName(std::string nname)
 {
-    username = nname;
+    nickname = nname;
 }
 
 void Client::botJoinChannel(Channel *channel)

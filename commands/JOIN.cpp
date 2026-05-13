@@ -3,25 +3,6 @@
 #include "../includes/Server.hpp"
 #include "../includes/Commandeparse.hpp"
 
-// static void valideArgs(std::vector<std::string> args)
-// {
-//     std::cout << "-------> " << args[1] << "\n";
-//     if(args.size() > 1 && args[1][0] == '#' && args[1][1] && isalnum(args[1][1])){
-//         for(size_t j = 0; args[1][j]; j++){
-//             if(args[1][j] == ','){
-//                 if(args[1][j+1] && args[1][j+1] == '#'){
-//                     if(args[1][j+2] && isalnum(args[1][j+2]))
-//                         continue;
-//                     else throw "invalide channel name (empty or not alphaNum)";
-//                 }         
-//                 else throw "coma (,) folowed by invalide character";
-//             }
-//         }
-//     }
-//     else throw "Channels need '#' at start";
-// }
-
-
 static void valideArgs(std::vector<std::string> args)
 {
     std::cout << "-------> " << args[0] << "\n";

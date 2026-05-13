@@ -135,59 +135,41 @@ std::string toString(int value)
 
 bool Server::initSocket()
 {
-    int status;
-    struct addrinfo hints;
-    struct addrinfo *servinfo; //point to results
-    struct addrinfo *p; //current
-
-    memset(&hints, 0, sizeof hints); //make sure the struct is empty
-    hints.ai_family = AF_UNSPEC; //don't care IPv4 or IPv6
-    hints.ai_socktype = SOCK_STREAM; //TCP stream sockets
-    hints.ai_flags = AI_PASSIVE; //fill in my IP for me
-    if((status = getaddrinfo(NULL, toString(_config.port).c_str(), &hints, &servinfo)) != 0)
+    if((_srvSoc_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
-        std::cerr << "getaddressinfo " <<  gai_strerror(status) << std::endl;
+        perror("socket");
+        std::cerr << "Socket creation failed " << std::endl;
         return false;
     }
-    for(p = servinfo; p != NULL; p = p->ai_next)
+    //Set non-blocking
+    int flags = fcntl(_srvSoc_fd, F_GETFL, 0);
+    if(flags == -1)
     {
-        if((_srvSoc_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
-        {
-            perror("socket");
-            continue;
-        }
-        //Set non-blocking
-        int flags = fcntl(_srvSoc_fd, F_GETFL, 0);
-        if(flags == -1)
-        {
-            perror("fcntl F_GETFL");
-            return false;
-        }
-        // Set the O_NONBLOCK flag
-        if (fcntl(_srvSoc_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-            perror("fcntl");
-            return false;
-        }
-        int opt = 1;
-        if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)\
-        {
-            perror("setsockopt");
-            close(_srvSoc_fd);
-            return false;
-        }
-        if(bind(_srvSoc_fd, p->ai_addr, p->ai_addrlen) == -1)
-        {
-            close(_srvSoc_fd);
-            perror("bind");
-            continue;
-        }
-        break; // if we get here, we must have connected successfully
+        perror("fcntl F_GETFL");
+        return false;
     }
-    freeaddrinfo(servinfo); // free the linked-list
-
-    if (p == NULL)
+    // Set the O_NONBLOCK flag
+    if (fcntl(_srvSoc_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+        perror("fcntl");
+        return false;
+    }
+    int opt = 1;
+    if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)\
     {
-        std::cerr << "bind: unable to create server socket" << std::endl;
+        perror("setsockopt");
+        close(_srvSoc_fd);
+        return false;
+    }
+    memset(&_address, 0, sizeof(_address));
+    _address.sin_family = AF_INET;
+    int listen_port = _config.port;
+    _address.sin_port = htons(listen_port);
+    _address.sin_addr.s_addr = INADDR_ANY;
+
+    if(bind(_srvSoc_fd, (struct sockaddr*)&_address, sizeof(_address)) < 0)
+    {
+        close(_srvSoc_fd);
+        perror("bind");
         return false;
     }
 
@@ -208,6 +190,7 @@ bool Server::initSocket()
     fds.push_back(ev);
     return true;
 }
+
 
 void Server::addNewClient()
 {

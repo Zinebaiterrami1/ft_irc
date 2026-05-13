@@ -45,7 +45,6 @@ class Server
         config _config;
         std::vector<Channel*> Channels;
         std::string server_hostname;
-        Client *bot;
     public:
         static bool sig;
         Server(const config &cfg);

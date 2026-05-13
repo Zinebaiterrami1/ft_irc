@@ -1,10 +1,9 @@
 #include "../includes/Server.hpp"
 
-Client::Client(int fd, char* hostnamee)
+Client::Client(int fd)
 : fd(fd),
   nickname(""),
   username(""),
-  hostname(hostnamee),
   realname(""),
   client_hostname("127.0.0.1"),
   c_channels(),

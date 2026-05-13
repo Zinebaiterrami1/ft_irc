@@ -43,7 +43,7 @@ class Server
         std::map<std::string, Channel*> channels;
         std::vector<int> ClientFds;
         config _config;
-        std::vector<Channel*> Channels;
+        std::vector<Channel*> Channels; 
         std::string server_hostname;
         Client *bot;
     public:

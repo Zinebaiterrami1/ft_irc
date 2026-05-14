@@ -211,109 +211,50 @@ void Server::addNewClient()
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
     clientPollFd.revents = 0;
-    Client *client = new Client(
-    clientFd,
-    inet_ntoa(clientAddr.sin_addr));
+    Client *client = new Client(clientFd);
     client->ser = this;
     clients.push_back(client);
     ClientFds.push_back(client->getFd());
     fds.push_back(clientPollFd);
-    std::cout << "New client connected: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
+    std::cout << "New client connected\n";
 }
-
-// void Server::receiveData(int clientFd)
-// {
-//     char tmp[1024];
-//     tmp[0] = '\0';
-//     Client &client = *getClient(clientFd);
-//     std::string &buffer = client.read_buffer;
-    
-//     int bytes = recv(clientFd, tmp, sizeof(tmp)-1, 0);
-//     tmp[bytes] = '\0';
-
-//     if(bytes > 0){//append buffer 
-//         buffer += tmp;
-//         size_t found = buffer.find('\n');
-        
-//         if(found != std::string::npos)//donne a parse commande et execute
-//         {
-//             int x = buffer[found-1] != '\r'?0:1;
-//             std::string cmd = buffer.substr(0, found-x);
-//             if(cmd.length() > 510)
-//                 return;
-//             buffer = buffer.substr(found+1, buffer.length());
-//             client.execute(parser_commande(cmd));
-//         }
-//     }
-//     else if(bytes == 0){//connection close //remove client
-//         //leave all channels
-//         //remove frome clients in server 
-//         removeClient(clientFd, 0);
-//     }
-//     else{//an error occured perror()
-//         perror("recv : ");
-//     }
-// }
 
 void Server::receiveData(int clientFd)
 {
     char tmp[1024];
-    // tmp[0] = '\0';
-    // Client &client = *getClient(clientFd);
-    // std::string &buffer = client.read_buffer;
-    // int bytes = recv(clientFd, tmp, sizeof(tmp)-1, 0);
-    
-    // if(bytes > 0){//append buffer 
-    //     tmp[bytes] = '\0';
-    //     buffer += tmp;
-    //     size_t found = buffer.find('\n');
-        
-    //     if(found != std::string::npos)//donne a parse commande et execute
-    //     {
-    //         int x = buffer[found-1] != '\r' ? 0 : 1;
-    //         std::string cmd = buffer.substr(0, found-x);
-    //         if(cmd.length() > 510)
-    //         {
-    //             sendData(clientFd, "Commande to langue\n");
-                
-    //             return;
-    //         }
-    //         buffer = buffer.substr(found+1, buffer.length());
-    //         client.execute(parser_commande(cmd));
-    //     }
-    
+
     Client &client = *getClient(clientFd);
     std::string &buffer = client.read_buffer;
 
-    int bytes = recv(clientFd, tmp, sizeof(tmp) - 1, 0);
-
-    if (bytes <= 0)
+    ssize_t bytes = recv(clientFd, tmp, sizeof(tmp), 0);
+    
+    if(bytes <= 0)
     {
-        if (bytes == 0)
-            removeClient(clientFd, 0);
+        if(bytes < 0)
+            perror("recv failed : ");
         else
-            perror("recv");
+        {
+            std::cout << RED << "HHHHHHH\n" << RESET ;
+            removeClient(clientFd, 0);
+        }
         return;
     }
-
-    tmp[bytes] = '\0';
-    buffer += tmp;
-
+    
+    // tmp[bytes] = '\0';
+    buffer.append(tmp, bytes);
     size_t pos;
-
-    while ((pos = buffer.find('\n')) != std::string::npos)
+    while((pos = buffer.find('\n')) != std::string::npos)
     {
         std::string line = buffer.substr(0, pos);
         buffer.erase(0, pos + 1);
-
-        // clean \r
-        if (!line.empty() && line[line.length() - 1] == '\r')
-            line.erase(line.length() - 1);
-
-        if (line.length() > 510)
+        if(!line.empty() && line[line.length()-1] == '\r')
+            line.erase(line.length()-1);
+        if(line.length() > 510)
+        {
+            std::cerr << RED << "ERROR : Commande length more than 510\n" << RESET;
             continue;
-
-        if (!line.empty())
+        }
+        if(!line.empty())
             client.execute(parser_commande(line));
     }
 }
@@ -341,22 +282,39 @@ void Server::removeClient(int fd, int flag)
             it++;
         }
         this->clients.clear();
+        fds.clear();
+        ClientFds.clear();
         return ;
     }
-    for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
+    else
     {
-        if(it->fd == fd)
+        std::vector<Client*>::iterator it = this->clients.begin();
+        while(it != clients.end())
         {
-            fds.erase(it);
-            break;
+            if((*it)->fd == fd)
+            {
+                it = clients.erase(it);
+                delete *it;
+            }
+            else 
+                it++;
         }
-    }
-    for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
-    {
-        if(*it == fd)
+        //remove client from server
+        for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
         {
-            ClientFds.erase(it);
-            break;
+            if(it->fd == fd)
+            {
+                fds.erase(it);
+                break;
+            }
+        }
+        for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
+        {
+            if(*it == fd)
+            {
+                ClientFds.erase(it);
+                break;
+            }
         }
     }
     std::cout << "Client " << fd << " removed" << std::endl;

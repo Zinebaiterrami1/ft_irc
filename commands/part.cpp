@@ -27,13 +27,13 @@ void Client::HandledPART(const Commandeparse &cmd)
         Channel *ch = ser->get_channel(channels[i]);
         if(!ch)
         {
-            ser->sendData(fd, ":" + hostname + " 403 " + nickname 
+            ser->sendData(fd, ":" + ser->get_hostname() + " 403 " + nickname 
                     + " " + channels[i] + " :No such channel\r\n");
             continue;
         }
         if(!in_channel(ch))
         {
-            ser->sendData(fd, ":" + hostname + " 442 " + nickname 
+            ser->sendData(fd, ":" + ser->get_hostname() + " 442 " + nickname 
                 + " " + ch->getName() + " :You're not on that channel\r\n");
             continue;
         }

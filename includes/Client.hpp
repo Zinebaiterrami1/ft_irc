@@ -11,7 +11,7 @@ class Client{
         int fd; 
         std::string nickname;
         std::string username;
-        std::string hostname;
+        // std::string hostname;
         std::string realname;
         std::string client_hostname;
         std::set<Channel*> c_channels;
@@ -23,7 +23,7 @@ class Client{
         bool c_nick;
 
     public :
-        Client(int fd, char *hostname);
+        Client(int fd);
         ~Client();
 
         void set_hostname(const std::string& host);

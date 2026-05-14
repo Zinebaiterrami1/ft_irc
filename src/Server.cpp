@@ -234,13 +234,11 @@ void Server::receiveData(int clientFd)
             perror("recv failed : ");
         else
         {
-            std::cout << RED << "HHHHHHH\n" << RESET ;
             removeClient(clientFd, 0);
         }
         return;
     }
     
-    // tmp[bytes] = '\0';
     buffer.append(tmp, bytes);
     size_t pos;
     while((pos = buffer.find('\n')) != std::string::npos)
@@ -267,8 +265,6 @@ void Server::sendData(int fd, std::string mssg)
         perror("send");
         removeClient(fd, 0);
     }
-    else
-        std::cout << "Sent to " << fd << ": " << mssg << std::endl;
 }
 
 void Server::removeClient(int fd, int flag)

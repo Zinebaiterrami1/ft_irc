@@ -5,14 +5,11 @@
 
 static void valideArgs(std::vector<std::string> args)
 {
-    std::cout << "-------> " << args[0] << "\n";
     if(args[0][0] == '#' && args[0][1] && isalnum(args[0][1])){
         for(size_t j = 1; args[0][j]; j++){
             if(args[0][j] == '#'){
                 if(args[0][j+1] && isalnum(args[0][j+1]) && args[0][j-1] == ','){
-                    // if(args[0][j+2] && isalnum(args[0][j+2]))
                     continue;
-                    // else throw "invalide channel name (empty or not alphaNum)";
                 }         
                 else throw "INVALIDE CHANNELS NAME";
             }
@@ -21,19 +18,19 @@ static void valideArgs(std::vector<std::string> args)
     else throw "Channels need '#' at start";
 }
 
-void leaveAll(std::vector<Channel*> ch,Client *client)
-{//remove user from serv.ch
-    for(size_t i = 0; i < ch.size(); i++)
-    {
-        if(ch[i]->hasUser(client))
-        {
-            ch[i]->removeUser(client);
-            ch[i]->removeOperator(client);
-        }
-    }
-}
+// void leaveAll(std::vector<Channel*> ch,Client *client)
+// {
+//     for(size_t i = 0; i < ch.size(); i++)
+//     {
+//         if(ch[i]->hasUser(client))
+//         {
+//             ch[i]->removeUser(client);
+//             ch[i]->removeOperator(client);
+//         }
+//     }
+// }
 
-std::vector<std::string> split_Channels(std::string chnl){//#ch1,#ch2,
+std::vector<std::string> split_Channels(std::string chnl){
     std::vector<std::string> Splited_chnl;
     std::string str;
     std::stringstream ss(chnl);
@@ -44,23 +41,10 @@ std::vector<std::string> split_Channels(std::string chnl){//#ch1,#ch2,
         Splited_chnl.push_back(str);
     }
     
-    // for(size_t i = 0; i < chnl.size(); i++)
-    // {
-    //     if(chnl[i] == '#')
-    //     {
-    //         i++;
-    //         size_t next = chnl.find('#', i);
-    //         if(next == std::string::npos)
-    //             next = chnl.length() + 1;
-    //         std::string name = chnl.substr(i, next-1 - i);// -1 to not take ','                 #abc,#ch
-    //         Splited_chnl.push_back(name);
-    //     }
-    // }
     return Splited_chnl;
 }
 
-
-std::vector<std::string> split_Keys(std::vector<std::string> keys){//key1 key2
+std::vector<std::string> split_Keys(std::vector<std::string> keys){
     std::vector<std::string> Splited_keys;
     for(size_t i = 1; i < keys.size(); i++)
     {
@@ -68,14 +52,6 @@ std::vector<std::string> split_Keys(std::vector<std::string> keys){//key1 key2
     }
     return Splited_keys;
 }
-
-// bool channelNotFound(std::vector<Channel*> channels, std::string name){
-//     for(size_t i = 0; i < channels.size(); i++){
-//         if(channels[i]->getName() == name)
-//             return false;
-//     }
-//     return true;
-// }
 
 void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::string> keys, Client *client, Server *ser)
 {
@@ -120,19 +96,13 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
         {
             chl->removeInvite(client);
         }
-        // if(!chl)
-        // {
-        //     chl = ser->create_channel(channels[i]);
-        //     chl->addOperator(client);
-        // }
+
         chl->addUser(client);
         client->c_channels.insert(chl);
 
         std::string msg = ":" + client->get_prefix() + " JOIN :" + channel_name + "\r\n";
-        // ser->sendData(client->getFd(), msg);
         chl->brodcast_Channel(msg, ser);
 
-        std::cout << RED << "CLIENT " << client->get_nickname() << "JOINED  TO CHANNEL " << channel_name <<"\n";
 
         if(!chl->getTopic().empty())
             ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 332 " + client->get_nickname() + " " + channel_name + " :" + chl->getTopic() + "\r\n");
@@ -163,7 +133,6 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
 
 void Client::HandledJOIN(const Commandeparse &cmd)
 {
-    //CHECK IF INVITE ONLY 
     try{
 
         if(!Authenticated){
@@ -173,28 +142,10 @@ void Client::HandledJOIN(const Commandeparse &cmd)
             ser->sendData(getFd(), ":" + ser->get_hostname() + " 461 " + "JOIN :Not enough parameters" + " :\r\n");
             return;
         }
-
-        valideArgs(cmd.args);//if no # //existe 
-
-        if(cmd.args.size() == 1 && cmd.args[0] == "0")
-        {
-            leaveAll(ser->get_all_channels(), this);
-        }
-
-        else 
-        {//MODE #secret +k hello42   //key == MODE #secret +k hello42
-            std::vector<std::string> channels = split_Channels(cmd.args[0]);
-            for(size_t i = 0; i < channels.size(); i++){
-                std::cout << RED << channels[i] << RESET << "  ";
-            }
-            std::cout << "\n";
-            std::vector<std::string> keys = split_Keys(cmd.args);
-            for(size_t i = 0; i < keys.size(); i++){
-                std::cout << GRE << keys[i] << RESET << "  ";
-            }
-            std::cout << "\n";
-            join_Multi_Channls(channels, keys, this,  ser);//if first client creat channel
-        }
+        valideArgs(cmd.args);
+        std::vector<std::string> channels = split_Channels(cmd.args[0]);
+        std::vector<std::string> keys = split_Keys(cmd.args);
+        join_Multi_Channls(channels, keys, this,  ser);
     }
     catch(const char *error){
         std::cerr << error << "\n";

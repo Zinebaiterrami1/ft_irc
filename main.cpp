@@ -49,9 +49,6 @@ int main(int ac, char **av)
             std::cerr << "password empty" << std::endl;
             return 1;
         }
-        
-        std::cout << MAG << "Port: " << con.port << std::endl;
-        std::cout << "Password: " << con.password << RESET << std::endl;
 
         Server ser(con);
         ser.StartServer();

@@ -141,15 +141,7 @@ bool Server::initSocket()
         std::cerr << "Socket creation failed " << std::endl;
         return false;
     }
-    //Set non-blocking
-    int flags = fcntl(_srvSoc_fd, F_GETFL, 0);
-    if(flags == -1)
-    {
-        perror("fcntl F_GETFL");
-        return false;
-    }
-    // Set the O_NONBLOCK flag
-    if (fcntl(_srvSoc_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+    if (fcntl(_srvSoc_fd, F_SETFL, O_NONBLOCK) == -1) {
         perror("fcntl");
         return false;
     }

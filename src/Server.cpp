@@ -197,7 +197,6 @@ void Server::addNewClient()
         perror("accept");
         return ;
     }
-    //create new client
     pollfd clientPollFd;
 
     clientPollFd.fd = clientFd;
@@ -278,17 +277,43 @@ void Server::removeClient(int fd, int flag)
     else
     {
         std::vector<Client*>::iterator it = this->clients.begin();
-        while(it != clients.end())
-        {
-            if((*it)->fd == fd)
+        // while(it != clients.end())
+        // {
+        //     if((*it)->fd == fd)
+        //     {
+        //         delete *it;
+        //         std::set<Channel *> channels = (*it)->c_channels;
+        //         for(size_t i = 0; i < channels.size(); i++){
+        //             channels[i]->users.erase(it);
+        //             channels[i]->operators.erase(it);
+        //         }
+        //         it = clients.erase(it);
+
+        //     }
+        //     else 
+        //         it++;
+        // }
+        while (it != clients.end()){
+            if ((*it)->fd == fd)
             {
-                delete *it;
+                Client* client = *it;
+
+                std::set<Channel*> channels = client->c_channels;
+
+                for (std::set<Channel*>::iterator ch = channels.begin();
+                    ch != channels.end();
+                    ++ch)
+                {
+                    (*ch)->removeUser(client);
+                    (*ch)->removeOperator(client);
+                }
+
+                delete client;
                 it = clients.erase(it);
             }
-            else 
-                it++;
+            else
+                ++it;
         }
-        //remove client from server
         for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
         {
             if(it->fd == fd)
@@ -379,4 +404,3 @@ void Server::StartServer()
     CloseConnection();
     ClearChannels();
 }
-

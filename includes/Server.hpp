@@ -55,7 +55,7 @@ class Server
         void receiveData(int fd);
         void sendData(int fd, std::string msg);
         void CloseConnection();
-        void runSocket();
+        bool runSocket();
         void removeClient(int fd, int flag);
         void ClearChannels();
         void delete_channel(const std::string& name);
@@ -64,8 +64,6 @@ class Server
         bool nickname_use(const std::string &nick, const Client *cl);
         const std::string &get_hostname() const {return server_hostname;}
         Channel *get_channel(const std::string &name);
-        void initBot();
-        bool hasBot() const;
         std::vector<Channel*> get_all_channels();
         Channel *create_channel(const std::string& name);
         Client *find_nicknameclient(const std::string &nick);

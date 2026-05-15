@@ -53,8 +53,6 @@ class Client{
         std::string getClientNickName() const;
         void setClientUserName(std::string uname);
         void setClientNickName(std::string nname);
-
-        void botJoinChannel(Channel* channel);
 };
 
 

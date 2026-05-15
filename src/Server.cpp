@@ -146,7 +146,7 @@ bool Server::initSocket()
         return false;
     }
     int opt = 1;
-    if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)\
+    if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR , &opt, sizeof(opt)) < 0)
     {
         perror("setsockopt");
         close(_srvSoc_fd);
@@ -230,7 +230,7 @@ void Server::receiveData(int clientFd)
         }
         return;
     }
-    
+
     buffer.append(tmp, bytes);
     size_t pos;
     while((pos = buffer.find('\n')) != std::string::npos)
@@ -247,6 +247,7 @@ void Server::receiveData(int clientFd)
         if(!line.empty())
             client.execute(parser_commande(line));
     }
+
 }
 
 void Server::sendData(int fd, std::string mssg)
@@ -281,8 +282,8 @@ void Server::removeClient(int fd, int flag)
         {
             if((*it)->fd == fd)
             {
-                it = clients.erase(it);
                 delete *it;
+                it = clients.erase(it);
             }
             else 
                 it++;
@@ -334,17 +335,24 @@ void Server::ClearChannels()
     Channels.clear();
 }
 
-void Server::runSocket()
+bool Server::runSocket()
 {
     signal(SIGINT, signalHandler);
     signal(SIGQUIT, signalHandler);
-    initSocket();
+    if(!initSocket())
+    {
+        std::cerr << "Socket init failed" << std::endl;
+        return false;
+    }
     std::cout << "Server Launched and listening on port " << _config.port << std::endl;
+    return true;
 }
 
 void Server::StartServer()
 {
-    runSocket();
+    
+    if (!runSocket())
+        return;
     while(!sig)
     {
         if(poll(fds.data(), fds.size(), -1) == -1 && !sig)

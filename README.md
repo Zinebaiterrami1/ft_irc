@@ -135,14 +135,14 @@ Removes a user from a channel.
 - The server starts by creating a listening socket using socket().
 Then, bind() associates the socket with an IP address and a port, while listen() enables the socket to accept incoming client connections and queues pending requests.
 
-To manage multiple clients simultaneously, the server uses I/O multiplexing with poll(). The server socket file descriptor is stored inside a pollfd structure and monitored inside the main event loop.
+- To manage multiple clients simultaneously, the server uses I/O multiplexing with poll(). The server socket file descriptor is stored inside a pollfd structure and monitored inside the main event loop.
 
-Inside the loop, poll() waits for activity on the monitored file descriptors. When an event occurs:
+- Inside the loop, poll() waits for activity on the monitored file descriptors. When an event occurs:
 
-If the active file descriptor is the server socket, the server recognizes it as a new incoming connection and calls accept() to create a new client socket.
+- If the active file descriptor is the server socket, the server recognizes it as a new incoming connection and calls accept() to create a new client socket.
 Otherwise, the event comes from an already connected client, and the server uses recv() to read incoming IRC commands.
 
-After processing the received command, the server responds to the client using send() to transmit data back through the corresponding client socket.
+- After processing the received command, the server responds to the client using send() to transmit data back through the corresponding client socket.
 
 ---
 

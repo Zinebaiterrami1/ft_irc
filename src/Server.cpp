@@ -261,74 +261,60 @@ void Server::sendData(int fd, std::string mssg)
 
 void Server::removeClient(int fd, int flag)
 {
-    if(flag)
-    {
-        std::vector<Client*>::iterator it = this->clients.begin();
-        while(it != clients.end())
+    (void)flag;
+    //To remove only one client
+    std::vector<Client*>::iterator it = this->clients.begin();
+    // while(it != clients.end())
+    // {
+    //     if((*it)->fd == fd)
+    //     {
+    //         delete *it;
+    //         std::set<Channel *> channels = (*it)->c_channels;
+    //         for(size_t i = 0; i < channels.size(); i++){
+    //             channels[i]->users.erase(it);
+    //             channels[i]->operators.erase(it);
+    //         }
+    //         it = clients.erase(it);
+
+    //     }
+    //     else 
+    //         it++;
+    // }
+    while (it != clients.end()){
+        if ((*it)->fd == fd)
         {
-            delete *it;
-            it++;
+            Client* client = *it;
+
+            std::set<Channel*> channels = client->c_channels;
+
+            for (std::set<Channel*>::iterator ch = channels.begin();
+                ch != channels.end();
+                ++ch)
+            {
+                (*ch)->removeUser(client);
+                (*ch)->removeOperator(client);
+            }
+
+            delete client;
+            it = clients.erase(it);
         }
-        this->clients.clear();
-        fds.clear();
-        ClientFds.clear();
-        return ;
+        else
+            ++it;
     }
-    else
+    for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
     {
-        std::vector<Client*>::iterator it = this->clients.begin();
-        // while(it != clients.end())
-        // {
-        //     if((*it)->fd == fd)
-        //     {
-        //         delete *it;
-        //         std::set<Channel *> channels = (*it)->c_channels;
-        //         for(size_t i = 0; i < channels.size(); i++){
-        //             channels[i]->users.erase(it);
-        //             channels[i]->operators.erase(it);
-        //         }
-        //         it = clients.erase(it);
-
-        //     }
-        //     else 
-        //         it++;
-        // }
-        while (it != clients.end()){
-            if ((*it)->fd == fd)
-            {
-                Client* client = *it;
-
-                std::set<Channel*> channels = client->c_channels;
-
-                for (std::set<Channel*>::iterator ch = channels.begin();
-                    ch != channels.end();
-                    ++ch)
-                {
-                    (*ch)->removeUser(client);
-                    (*ch)->removeOperator(client);
-                }
-
-                delete client;
-                it = clients.erase(it);
-            }
-            else
-                ++it;
-        }
-        for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
+        if(it->fd == fd)
         {
-            if(it->fd == fd)
-            {
-                fds.erase(it);
-                break;
-            }
+            fds.erase(it);
+            break;
         }
-        for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
+    }
+    for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
+    {
+        if(*it == fd)
         {
-            if(*it == fd)
-            {
-                ClientFds.erase(it);
-                break;
-            }
+            ClientFds.erase(it);
+            break;
         }
     }
     std::cout << "Client " << fd << " removed" << std::endl;
@@ -342,6 +328,9 @@ void Server::CloseConnection()
     {
         close((*it)->getFd());
         delete *it;
+        clients.clear();
+        fds.clear();
+        ClientFds.clear();
     }
     
     if(this->_srvSoc_fd != -1)
@@ -400,7 +389,6 @@ void Server::StartServer()
             }
         }
     }
-    removeClient(_srvSoc_fd, 1);
-    CloseConnection();
+    CloseConnection();//shutdown all clients
     ClearChannels();
 }

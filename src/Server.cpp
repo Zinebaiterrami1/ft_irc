@@ -146,7 +146,7 @@ bool Server::initSocket()
         return false;
     }
     int opt = 1;
-    if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0)\
+    if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR , &opt, sizeof(opt)) < 0)
     {
         perror("setsockopt");
         close(_srvSoc_fd);
@@ -197,7 +197,6 @@ void Server::addNewClient()
         perror("accept");
         return ;
     }
-    //create new client
     pollfd clientPollFd;
 
     clientPollFd.fd = clientFd;
@@ -230,7 +229,7 @@ void Server::receiveData(int clientFd)
         }
         return;
     }
-    
+
     buffer.append(tmp, bytes);
     size_t pos;
     while((pos = buffer.find('\n')) != std::string::npos)
@@ -247,6 +246,7 @@ void Server::receiveData(int clientFd)
         if(!line.empty())
             client.execute(parser_commande(line));
     }
+
 }
 
 void Server::sendData(int fd, std::string mssg)
@@ -277,17 +277,43 @@ void Server::removeClient(int fd, int flag)
     else
     {
         std::vector<Client*>::iterator it = this->clients.begin();
-        while(it != clients.end())
-        {
-            if((*it)->fd == fd)
+        // while(it != clients.end())
+        // {
+        //     if((*it)->fd == fd)
+        //     {
+        //         delete *it;
+        //         std::set<Channel *> channels = (*it)->c_channels;
+        //         for(size_t i = 0; i < channels.size(); i++){
+        //             channels[i]->users.erase(it);
+        //             channels[i]->operators.erase(it);
+        //         }
+        //         it = clients.erase(it);
+
+        //     }
+        //     else 
+        //         it++;
+        // }
+        while (it != clients.end()){
+            if ((*it)->fd == fd)
             {
+                Client* client = *it;
+
+                std::set<Channel*> channels = client->c_channels;
+
+                for (std::set<Channel*>::iterator ch = channels.begin();
+                    ch != channels.end();
+                    ++ch)
+                {
+                    (*ch)->removeUser(client);
+                    (*ch)->removeOperator(client);
+                }
+
+                delete client;
                 it = clients.erase(it);
-                delete *it;
             }
-            else 
-                it++;
+            else
+                ++it;
         }
-        //remove client from server
         for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
         {
             if(it->fd == fd)
@@ -334,17 +360,24 @@ void Server::ClearChannels()
     Channels.clear();
 }
 
-void Server::runSocket()
+bool Server::runSocket()
 {
     signal(SIGINT, signalHandler);
     signal(SIGQUIT, signalHandler);
-    initSocket();
+    if(!initSocket())
+    {
+        std::cerr << "Socket init failed" << std::endl;
+        return false;
+    }
     std::cout << "Server Launched and listening on port " << _config.port << std::endl;
+    return true;
 }
 
 void Server::StartServer()
 {
-    runSocket();
+    
+    if (!runSocket())
+        return;
     while(!sig)
     {
         if(poll(fds.data(), fds.size(), -1) == -1 && !sig)
@@ -371,4 +404,3 @@ void Server::StartServer()
     CloseConnection();
     ClearChannels();
 }
-

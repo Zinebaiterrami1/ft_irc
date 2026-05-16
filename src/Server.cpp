@@ -146,7 +146,7 @@ bool Server::initSocket()
         return false;
     }
     int opt = 1;
-    if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)\
+    if(setsockopt(_srvSoc_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0)\
     {
         perror("setsockopt");
         close(_srvSoc_fd);

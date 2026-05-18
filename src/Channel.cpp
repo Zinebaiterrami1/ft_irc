@@ -16,6 +16,7 @@ Channel::Channel(const std::string &channelName)
       topic(""),
       inviteOnly(false),
       topicRestricted(false),
+      limitenabled(false),
       userLimit(-1)
 {
 }

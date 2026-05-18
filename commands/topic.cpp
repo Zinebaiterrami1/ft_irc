@@ -49,5 +49,5 @@ void Client::HandledTOPIC(const Commandeparse &cmd)
     std::string prefix_tpoic =  ":" + get_prefix() + " TOPIC " + name_Channel +  " :" + topic + "\r\n";
     // ser->sendData(getFd() , prefix_tpoic);
 
-    chan->brodcast_Channel(prefix_tpoic , ser);
+    chan->brodcast_Channel1(prefix_tpoic , this,ser);
 }

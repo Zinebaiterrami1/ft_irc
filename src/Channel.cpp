@@ -20,7 +20,18 @@ Channel::Channel(const std::string &channelName)
       userLimit(-1)
 {
 }
+void Channel::brodcast_Channel1(const std::string &msg, Client *sender, Server *ser)
+{
+    for (size_t i = 0; i < users.size(); i++)
+    {
+        Client *r = users[i];
 
+        if (!r || r == sender)
+            continue;
+
+        ser->sendData(r->getFd(), msg);
+    }
+}
 
 void Channel::brodcast_Channel(const std::string &msg,  Server *ser)
 {

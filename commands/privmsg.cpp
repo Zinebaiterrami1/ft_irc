@@ -49,7 +49,7 @@ void Client::HandledPRIVMSG(const Commandeparse &cmd)
             return;
         }
         
-        chan->brodcast_Channel(msg_send, ser);
+        chan->brodcast_Channel1(msg_send,this, ser);
     }
     else
     {

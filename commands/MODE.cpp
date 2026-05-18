@@ -87,7 +87,12 @@ void Client::HandledMODE(const Commandeparse &cmd)
             else if (m == 'l')
             {
                 if (sign == '+' && idx < param.size())
-                    chl->setUserLimit(std::atoi(param[idx++].c_str()));
+                {
+
+                    chl->setUserLimit(std::atoi(param[idx].c_str()));
+                    applied_params += " " + param[idx]; 
+                    idx++;
+                }
                 else if (sign == '-')
                 {
                     chl->removeUserLimit();
@@ -124,6 +129,6 @@ void Client::HandledMODE(const Commandeparse &cmd)
         {
             std::string msg = ":" + get_prefix() + " MODE " + ch_name + " " +
                               applied_modes + applied_params + "\r\n";
-            chl->brodcast_Channel(msg, ser);
+            chl->brodcast_Channel1(msg,this, ser);
         }
 }

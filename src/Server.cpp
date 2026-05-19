@@ -277,22 +277,22 @@ void Server::removeClient(int fd, int flag)
     else
     {
         std::vector<Client*>::iterator it = this->clients.begin();
-        // while(it != clients.end())
-        // {
-        //     if((*it)->fd == fd)
-        //     {
-        //         delete *it;
-        //         std::set<Channel *> channels = (*it)->c_channels;
-        //         for(size_t i = 0; i < channels.size(); i++){
-        //             channels[i]->users.erase(it);
-        //             channels[i]->operators.erase(it);
-        //         }
-        //         it = clients.erase(it);
+        while(it != clients.end())
+        {
+            if((*it)->fd == fd)
+            {
+                delete *it;
+                std::set<Channel *> channels = (*it)->c_channels;
+                for(size_t i = 0; i < channels.size(); i++){
+                    channels[i]->users.erase(it);
+                    channels[i]->operators.erase(it);
+                }
+                it = clients.erase(it);
 
-        //     }
-        //     else 
-        //         it++;
-        // }
+            }
+            else 
+                it++;
+        }
         while (it != clients.end()){
             if ((*it)->fd == fd)
             {

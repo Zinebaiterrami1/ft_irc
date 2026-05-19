@@ -57,4 +57,7 @@ public:
     const std::vector<Client *> &getUsers() const;
     std::string get_mode() const;
     void brodcast_Channel(const std::string &msg,  Server *ser);
+    void brodcast_Channel1(const std::string &msg, Client *sender, Server *ser);
+
 };
+

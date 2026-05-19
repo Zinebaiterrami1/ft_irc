@@ -10,9 +10,10 @@ Server::Server(const config &cfg) : _srvSoc_fd(-1) , _config(cfg)
 
 Server::~Server()
 {
-    if(_srvSoc_fd != -1)
-        close(_srvSoc_fd);
+    CloseConnection();
+    ClearChannels();
 }
+
 Channel *Server::get_channel(const std::string &name)
 {
     for (size_t i = 0; i < Channels.size(); i++)
@@ -150,6 +151,7 @@ bool Server::initSocket()
     {
         perror("setsockopt");
         close(_srvSoc_fd);
+        _srvSoc_fd = -1;
         return false;
     }
     memset(&_address, 0, sizeof(_address));
@@ -161,6 +163,7 @@ bool Server::initSocket()
     if(bind(_srvSoc_fd, (struct sockaddr*)&_address, sizeof(_address)) < 0)
     {
         close(_srvSoc_fd);
+        _srvSoc_fd = -1;
         perror("bind");
         return false;
     }
@@ -169,6 +172,7 @@ bool Server::initSocket()
     {
         perror("listen");
         close(_srvSoc_fd);
+        _srvSoc_fd = -1;
         return false;
     }
     
@@ -214,6 +218,41 @@ void Server::receiveData(int clientFd)
 {
     char tmp[1024];
 
+    /*
+     3. SIGSEGV (Potential Crash)
+    In receiveData(int clientFd) (line 215):
+
+    1 Client &client = *getClient(clientFd); // Line 215
+    * The Issue: getClient returns a pointer which can be NULL (e.g., if a client was
+        removed earlier in the same poll cycle by a KICK or QUIT command). Dereferencing
+        a NULL pointer will cause an immediate segmentation fault.
+    * Fix: Always check if the pointer is valid:
+
+    1     Client *clientPtr = getClient(clientFd);
+    2     if (!clientPtr) return;
+    3     Client &client = *clientPtr;
+    */
+   /*
+     The Bug: When removeClient is called, it executes fds.erase(it). This shifts all
+  remaining file descriptors in the vector to the left. The for loop then does i++,
+  which means you skip the very next client that was waiting to send data. 
+   * If two clients send data at the same time and the first one is disconnected, the
+     second one's data will be ignored until the next poll cycle.
+   */
+  /*
+    How to fix both:
+   1. Apply the NULL check in receiveData.
+   2. Fix the loop in StartServer. A common way is to decrement i if a client was
+      removed, or simply process the loop in a way that handles the shift:
+
+   1     for(size_t i = 0; i < fds.size(); i++) {
+   2         // ...
+   3         size_t original_size = fds.size();
+   4         receiveData(fds[i].fd);
+   5         if (fds.size() < original_size) // A client was removed
+   6             i--; 
+   7     }
+  */
     Client &client = *getClient(clientFd);
     std::string &buffer = client.read_buffer;
 
@@ -261,21 +300,22 @@ void Server::sendData(int fd, std::string mssg)
 
 void Server::removeClient(int fd, int flag)
 {
-    if(flag)
-    {
-        std::vector<Client*>::iterator it = this->clients.begin();
-        while(it != clients.end())
-        {
-            delete *it;
-            it++;
-        }
-        this->clients.clear();
-        fds.clear();
-        ClientFds.clear();
-        return ;
-    }
-    else
-    {
+    (void) flag;
+    // if(flag)
+    // {
+    //     std::vector<Client*>::iterator it = this->clients.begin();
+    //     while(it != clients.end())
+    //     {
+    //         delete *it;
+    //         it++;
+    //     }
+    //     this->clients.clear();
+    //     fds.clear();
+    //     ClientFds.clear();
+    //     return ;
+    // }
+    // else
+    // {
         std::vector<Client*>::iterator it = this->clients.begin();
         // while(it != clients.end())
         // {
@@ -330,9 +370,8 @@ void Server::removeClient(int fd, int flag)
                 break;
             }
         }
-    }
-    std::cout << "Client " << fd << " removed" << std::endl;
-    close(fd);
+        std::cout << "Client " << fd << " removed" << std::endl;
+        close(fd);
 }
 
 void Server::CloseConnection()
@@ -340,13 +379,21 @@ void Server::CloseConnection()
     std::cout << "Closing all connections..." << std::endl;
     for(std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
     {
-        close((*it)->getFd());
-        delete *it;
+        if (*it)
+        {
+            close((*it)->getFd());
+            delete *it;
+        }
     }
     
+    clients.clear();
+    fds.clear();
+    ClientFds.clear();
+
     if(this->_srvSoc_fd != -1)
     {
         close(_srvSoc_fd);
+        _srvSoc_fd = -1;
     }
     std::cout << "All connections closed. Server shutdown complete." << std::endl;
 }
@@ -400,7 +447,7 @@ void Server::StartServer()
             }
         }
     }
-    removeClient(_srvSoc_fd, 1);
-    CloseConnection();
-    ClearChannels();
+    // removeClient(_srvSoc_fd, 1);
+    // CloseConnection();//shutdown all clients
+    // ClearChannels();
 }

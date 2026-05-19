@@ -18,18 +18,6 @@ static void valideArgs(std::vector<std::string> args)
     else throw "Channels need '#' at start";
 }
 
-// void leaveAll(std::vector<Channel*> ch,Client *client)
-// {
-//     for(size_t i = 0; i < ch.size(); i++)
-//     {
-//         if(ch[i]->hasUser(client))
-//         {
-//             ch[i]->removeUser(client);
-//             ch[i]->removeOperator(client);
-//         }
-//     }
-// }
-
 std::vector<std::string> split_Channels(std::string chnl){
     std::vector<std::string> Splited_chnl;
     std::string str;
@@ -70,6 +58,10 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
             + client->get_nickname() + " " + channel_name + " :Bad Channel Mask\r\n");
             continue;
         }
+        if(client->in_channel(chl))
+        {
+            continue;
+        }
         if(chl->isInviteOnly() && !chl->isInvited(client))
         {
             ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 473 " + client->get_nickname() 
@@ -86,10 +78,6 @@ void join_Multi_Channls(std::vector<std::string> channels, std::vector<std::stri
         {
             ser->sendData(client->getFd(), ":" + ser->get_hostname() + " 475 " + client->get_nickname() 
             + " " + channel_name + " :Cannot join channel (+k)\r\n");
-            continue;
-        }
-        if(client->in_channel(chl))
-        {
             continue;
         }
         if(chl->isInvited(client))

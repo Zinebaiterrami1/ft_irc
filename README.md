@@ -62,6 +62,7 @@ Allows a user to join a channel.
 
 - Creates the channel if it does not exist
 - A user can join multiple channels
+- ` JOIN <channel>,<channel>` 
 
 ---
 
@@ -69,11 +70,13 @@ Allows a user to join a channel.
 Allows a user to leave a channel.
 
 - Optional reason supported
+- `part <channel> :<reasn>` 
 
 ---
 
 ### PRIVMSG
 Sends a private message to a user or channel.
+- `PRIVMSG <user> or <channel> :<msg>` 
 
 ---
 
@@ -81,6 +84,7 @@ Sends a private message to a user or channel.
 Sets or views a channel topic.
 
 - If `+t` mode is enabled, only operators can change it
+- `topic <channel> :<new_topic>` 
 
 ---
 
@@ -88,6 +92,7 @@ Sets or views a channel topic.
 Invites a user to a channel.
 
 - Mainly used with `+i` (invite-only mode)
+- `invite <user> <channel>` 
 
 ---
 
@@ -95,7 +100,7 @@ Invites a user to a channel.
 Removes a user from a channel.
 
 - Optional reason supported
-
+- `kick <channel> <user> :<reason>` 
 ---
 
 ## Channel Modes
@@ -103,30 +108,35 @@ Removes a user from a channel.
 ### +i / -i (Invite only)
 - `+i` : only invited users can join
 - `-i` : disables invite-only mode
+- `mode <channel> +i or -i` 
 
 ---
 
 ### +t / -t (Topic protection)
 - `+t` : only operators can change the topic
 - `-t` : everyone can change it
+- `mode <channel> +t or -t` 
 
 ---
 
 ### +k / -k (Password)
 - `+k <password>` : sets a channel password
 - `-k` : removes the password
+- `mode <channel> +k or -k <password>` 
 
 ---
 
 ### +o / -o (Operator)
 - `+o <user>` : grants operator privileges
 - `-o <user>` : removes operator privileges
+- `mode <channel> +o or -o` 
 
 ---
 
 ### +l / -l (Limit)
 - `+l <number>` : sets a user limit
 - `-l` : removes the limit
+- `mode <channel> +l or -l <limit>` 
 
 ---
 

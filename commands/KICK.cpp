@@ -67,6 +67,7 @@ void Client::HandledKICK(const Commandeparse &cmd)
     chan->brodcast_Channel1(msg_predix, this, ser);
 
     chan->removeUser(cl_nick);
+    chan->removeOperator(cl_nick);
     cl_nick->renoveChannel(chan);
 
     if(chan->getUsers().empty())

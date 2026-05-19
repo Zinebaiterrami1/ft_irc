@@ -39,8 +39,7 @@ void Client::HandledPART(const Commandeparse &cmd)
         }
         std::string part_msg = ":" + get_prefix() + " PART " 
                             + ch->getName() + " :" + reason + "\r\n";
-        // ser->sendData(fd, part_msg);
-
+        ser->sendData(fd, part_msg);
         ch->brodcast_Channel1(part_msg,this, ser);
         renoveChannel(ch);
         ch->removeUser(this);

@@ -217,44 +217,10 @@ void Server::addNewClient()
 void Server::receiveData(int clientFd)
 {
     char tmp[1024];
-
-    /*
-     3. SIGSEGV (Potential Crash)
-    In receiveData(int clientFd) (line 215):
-
-    1 Client &client = *getClient(clientFd); // Line 215
-    * The Issue: getClient returns a pointer which can be NULL (e.g., if a client was
-        removed earlier in the same poll cycle by a KICK or QUIT command). Dereferencing
-        a NULL pointer will cause an immediate segmentation fault.
-    * Fix: Always check if the pointer is valid:
-
-    1     Client *clientPtr = getClient(clientFd);
-    2     if (!clientPtr) return;
-    3     Client &client = *clientPtr;
-    */
-   /*
-     The Bug: When removeClient is called, it executes fds.erase(it). This shifts all
-  remaining file descriptors in the vector to the left. The for loop then does i++,
-  which means you skip the very next client that was waiting to send data. 
-   * If two clients send data at the same time and the first one is disconnected, the
-     second one's data will be ignored until the next poll cycle.
-   */
-  /*
-    How to fix both:
-   1. Apply the NULL check in receiveData.
-   2. Fix the loop in StartServer. A common way is to decrement i if a client was
-      removed, or simply process the loop in a way that handles the shift:
-
-   1     for(size_t i = 0; i < fds.size(); i++) {
-   2         // ...
-   3         size_t original_size = fds.size();
-   4         receiveData(fds[i].fd);
-   5         if (fds.size() < original_size) // A client was removed
-   6             i--; 
-   7     }
-  */
-    Client &client = *getClient(clientFd);
-    std::string &buffer = client.read_buffer;
+    Client *client = getClient(clientFd);
+    if(!client)
+        return;
+    std::string &buffer = client->read_buffer;
 
     ssize_t bytes = recv(clientFd, tmp, sizeof(tmp), 0);
     
@@ -283,7 +249,7 @@ void Server::receiveData(int clientFd)
             continue;
         }
         if(!line.empty())
-            client.execute(parser_commande(line));
+            client->execute(parser_commande(line));
     }
 
 }
@@ -301,77 +267,46 @@ void Server::sendData(int fd, std::string mssg)
 void Server::removeClient(int fd, int flag)
 {
     (void) flag;
-    // if(flag)
-    // {
-    //     std::vector<Client*>::iterator it = this->clients.begin();
-    //     while(it != clients.end())
-    //     {
-    //         delete *it;
-    //         it++;
-    //     }
-    //     this->clients.clear();
-    //     fds.clear();
-    //     ClientFds.clear();
-    //     return ;
-    // }
-    // else
-    // {
-        std::vector<Client*>::iterator it = this->clients.begin();
-        // while(it != clients.end())
-        // {
-        //     if((*it)->fd == fd)
-        //     {
-        //         delete *it;
-        //         std::set<Channel *> channels = (*it)->c_channels;
-        //         for(size_t i = 0; i < channels.size(); i++){
-        //             channels[i]->users.erase(it);
-        //             channels[i]->operators.erase(it);
-        //         }
-        //         it = clients.erase(it);
-
-        //     }
-        //     else 
-        //         it++;
-        // }
-        while (it != clients.end()){
-            if ((*it)->fd == fd)
-            {
-                Client* client = *it;
-
-                std::set<Channel*> channels = client->c_channels;
-
-                for (std::set<Channel*>::iterator ch = channels.begin();
-                    ch != channels.end();
-                    ++ch)
-                {
-                    (*ch)->removeUser(client);
-                    (*ch)->removeOperator(client);
-                }
-
-                delete client;
-                it = clients.erase(it);
-            }
-            else
-                ++it;
-        }
-        for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
+    std::vector<Client*>::iterator it = this->clients.begin();
+    while (it != clients.end()){
+        if ((*it)->fd == fd)
         {
-            if(it->fd == fd)
+            Client* client = *it;
+
+            std::set<Channel*> channels = client->c_channels;
+
+            for (std::set<Channel*>::iterator ch = channels.begin();
+                ch != channels.end();
+                ++ch)
             {
-                fds.erase(it);
-                break;
+                (*ch)->removeUser(client);
+                (*ch)->removeOperator(client);
             }
+
+            delete client;
+            it = clients.erase(it);
         }
-        for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
+        else
+            ++it;
+    }
+    for(std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); it++)
+    {
+        if(it->fd == fd)
         {
-            if(*it == fd)
-            {
-                ClientFds.erase(it);
-                break;
-            }
+            fds.erase(it);
+            break;
         }
-        std::cout << "Client " << fd << " removed" << std::endl;
-        close(fd);
+    }
+    for(std::vector<int>::iterator it = ClientFds.begin(); it != ClientFds.end(); it++)
+    {
+        if(*it == fd)
+        {
+            ClientFds.erase(it);
+            break;
+        }
+    }
+    std::cout << "Client " << fd << " removed" << std::endl;
+    close(fd);
 }
 
 void Server::CloseConnection()
@@ -434,6 +369,7 @@ void Server::StartServer()
         }
         for(size_t i = 0; i < fds.size(); i++)
         {
+            size_t original_size = fds.size();
             if(fds[i].revents & POLLIN)
             {
                 if(fds[i].fd == _srvSoc_fd)
@@ -443,11 +379,10 @@ void Server::StartServer()
                 else
                 {
                     receiveData(fds[i].fd);
+                    if(original_size > fds.size())
+                        i--;
                 }
             }
         }
     }
-    // removeClient(_srvSoc_fd, 1);
-    // CloseConnection();//shutdown all clients
-    // ClearChannels();
 }
